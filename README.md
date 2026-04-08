@@ -44,13 +44,13 @@ Permite administrar productos, stock, ventas y compras, incorporando además pro
 ![Productos](screenshots/Productos.png)
 
 ### 💰 Ventas
-![Ventas](screenshots/ventas.png)
+![Ventas](screenshots/Ventas.png)
 
 ### 🧾 Formulario de ventas
 ![Formulario Ventas](screenshots/Ventasform.png)
 
 ### 🛒 Compras
-![Compras](screenshots/compras.png)
+![Compras](screenshots/Compras.png)
 
 ### 🧾 Formulario de compras
 ![Formulario Compras](screenshots/Compraform.png)

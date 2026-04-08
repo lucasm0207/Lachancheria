@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo|default:'Compra de Carne' }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🥩 {{ titulo|default:'Compra de Carne' }}</h2>
+        <a href="{% url 'compra_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la lista
+        </a>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors or detalle_formset.non_form_errors %}
+            <div class="alert alert-danger">
+                <strong>Hay errores en el formulario. Revisá los campos señalados.</strong>
+                <ul class="mb-0">
+                    {% for e in form.non_field_errors %}
+                        <li>{{ e }}</li>
+                    {% endfor %}
+                    {% for e in detalle_formset.non_form_errors %}
+                        <li>{{ e }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if detalle_formset.errors %}
+            {% for error_dict in detalle_formset.errors %}
+                {% if error_dict %}
+                    <div class="alert alert-warning">
+                        <strong>Error en detalle:</strong>
+                        {% for field, errors in error_dict.items %}
+                            {{ field }}: {{ errors|join:", " }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <!-- Card de Datos de la Compra -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Datos de la Compra</h5>
+                    </div>
+                    
+                    <div class="card-body p-4 bg-light">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3 bg-white p-3 rounded border">
+                                    <label class="form-label fw-bold text-dark">🏪 Proveedor</label>
+                                    {{ form.Id_proveedor }}
+                                    {% for error in form.Id_proveedor.errors %}
+                                        <div class="text-danger mt-1 small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3 bg-white p-3 rounded border">
+                                    <label class="form-label fw-bold text-dark">💳 Forma de Pago</label>
+                                    {{ form.Forma_pago }}
+                                    {% for error in form.Forma_pago.errors %}
+                                        <div class="text-danger mt-1 small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3 bg-white p-3 rounded border">
+                                    <label class="form-label fw-bold text-dark">💰 Monto Pagado</label>
+                                    {{ form.monto_pagado }}
+                                    <small class="text-muted">Dejar en 0 si queda como deuda</small>
+                                    {% for error in form.monto_pagado.errors %}
+                                        <div class="text-danger mt-1 small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" name="Tipo_compra" value="CARNE">
+                        <input type="hidden" name="Estado" value="completado">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{ detalle_formset.management_form }}
+
+        <!-- Card de Detalles de Compra -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i> 🥩 Detalles de la Compra</h5>
+                    </div>
+                    
+                    <div class="card-body p-4 bg-light">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle text-center bg-white" id="detalles-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Insumo (Carne)</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detalles-body">
+                                    {% for detalle_form in detalle_formset.forms %}
+                                        <tr class="detalle-item" data-form-index="{{ forloop.counter0 }}">
+                                            <td style="display:none;">
+                                                {{ detalle_form.Id_detalle }}
+                                            </td>
+                                            <td>
+                                                {{ detalle_form.Id_insumo }}
+                                                {% for error in detalle_form.Id_insumo.errors %}
+                                                    <div class="text-danger small">{{ error }}</div>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                {{ detalle_form.Cantidad }}
+                                                {% for error in detalle_form.Cantidad.errors %}
+                                                    <div class="text-danger small">{{ error }}</div>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                {{ detalle_form.Precio_total }}
+                                                {% for error in detalle_form.Precio_total.errors %}
+                                                    <div class="text-danger small">{{ error }}</div>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                <span style="display:none;">{{ detalle_form.DELETE }}</span>
+                                                <button type="button" class="btn btn-danger btn-sm eliminar-detalle">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <button type="button" id="agregar-detalle" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar insumo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card de Total -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-calculator me-2"></i> 💰 Total de la Compra</h5>
+                    </div>
+                    <div class="card-body text-center bg-light">
+                        <p id="compra-total" class="fs-2 fw-bold text-success mb-0">$0.00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <hr class="my-3">
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'compra_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="reset" class="btn btn-outline-warning">Limpiar</button>
+                    <button type="submit" class="btn btn-success fw-bold" id="btn-guardar">
+                        <i class="bi bi-check-circle me-2"></i> Guardar Compra
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Template oculto para nuevas filas -->
+<table style="display:none">
+    <tbody>
+        <tr id="empty-form-row" class="detalle-item">
+            <td style="display:none;">
+                {{ detalle_formset.empty_form.Id_detalle }}
+            </td>
+            <td>
+                {{ detalle_formset.empty_form.Id_insumo }}
+            </td>
+            <td>
+                {{ detalle_formset.empty_form.Cantidad }}
+            </td>
+            <td>
+                {{ detalle_formset.empty_form.Precio_total }}
+            </td>
+            <td>
+                <span style="display:none;">{{ detalle_formset.empty_form.DELETE }}</span>
+                <button type="button" class="btn btn-danger btn-sm eliminar-detalle"><i class="bi bi-trash"></i></button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const totalElement = document.getElementById("compra-total");
+    const addBtn = document.getElementById("agregar-detalle");
+    const tbody = document.getElementById("detalles-body");
+    const totalFormsInput = document.querySelector("input[name$='-TOTAL_FORMS']");
+    const emptyRowTemplate = document.getElementById("empty-form-row").outerHTML;
+
+    function calcularTotales() {
+        let totalCompra = 0;
+        document.querySelectorAll("#detalles-body tr.detalle-item").forEach(row => {
+            if (row.style.display === "none") return;
+            const subtotalInput = row.querySelector("input[name$='-Precio_total']");
+            if (subtotalInput) {
+                const subtotal = parseFloat(subtotalInput.value) || 0;
+                totalCompra += subtotal;
+            }
+        });
+        totalElement.textContent = `$${totalCompra.toFixed(2)}`;
+    }
+
+    addBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const currentCount = parseInt(totalFormsInput.value, 10);
+        const wrapper = document.createElement("tbody");
+        let newRowHtml = emptyRowTemplate.replace(/__prefix__/g, currentCount);
+        wrapper.innerHTML = newRowHtml;
+        const newRow = wrapper.querySelector("tr");
+        tbody.appendChild(newRow);
+        totalFormsInput.value = currentCount + 1;
+        calcularTotales();
+    });
+
+    tbody.addEventListener("click", function(e) {
+        if (e.target.classList.contains("eliminar-detalle") || e.target.closest(".eliminar-detalle")) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const row = e.target.closest("tr");
+            if (!row) return;
+
+            const deleteInput = row.querySelector("input[type='checkbox'][name$='-DELETE']");
+            if (deleteInput) {
+                deleteInput.checked = true;
+                row.style.display = "none";
+            } else {
+                row.remove();
+            }
+            calcularTotales();
+        }
+    });
+
+    document.addEventListener("input", e => {
+        if (e.target.matches("input[name$='-Precio_total']") || e.target.matches("input[name$='-Cantidad']")) {
+            calcularTotales();
+        }
+    });
+
+    calcularTotales();
+});
+</script>
+{% endblock %}

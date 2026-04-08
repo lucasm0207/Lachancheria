@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Promoción{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          <h4 class="mb-0">📋 Detalle de Promoción</h4>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <h5>Información del Producto</h5>
+              <table class="table table-sm">
+                <tr>
+                  <th>Producto:</th>
+                  <td><strong>{{ promocion.Id_producto.Corte }}</strong></td>
+                </tr>
+                <tr>
+                  <th>Categoría:</th>
+                  <td>{{ promocion.Id_producto.Id_categoria }}</td>
+                </tr>
+                <tr>
+                  <th>Precio Normal:</th>
+                  <td>${{ promocion.Id_producto.Precio_kilo }}/kg</td>
+                </tr>
+                <tr>
+                  <th>Stock Disponible:</th>
+                  <td>{{ promocion.Id_producto.stock_display }} kg</td>
+                </tr>
+              </table>
+            </div>
+
+            <div class="col-md-6">
+              <h5>Información de la Promoción</h5>
+              <table class="table table-sm">
+                <tr>
+                  <th>Tipo:</th>
+                  <td>
+                    <span class="badge bg-info">{{ promocion.get_tipo_promocion_display }}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Estado:</th>
+                  <td>
+                    {% if promocion.estado == 'activa' %}
+                      <span class="badge bg-success">✅ Activa</span>
+                    {% elif promocion.estado == 'inactiva' %}
+                      <span class="badge bg-secondary">⏸️ Inactiva</span>
+                    {% elif promocion.estado == 'programada' %}
+                      <span class="badge bg-warning">📅 Programada</span>
+                    {% elif promocion.estado == 'vencida' %}
+                      <span class="badge bg-dark">⏱️ Vencida</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Precio Oferta:</th>
+                  <td class="text-success"><strong>${{ promocion.Precio_oferta }}/kg</strong></td>
+                </tr>
+                <tr>
+                  <th>Descuento:</th>
+                  <td>
+                    <span class="badge bg-danger">-{{ promocion.porcentaje_descuento_calculado|floatformat:0 }}%</span>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-12">
+              <h5>Vigencia</h5>
+              <table class="table table-sm">
+                <tr>
+                  <th>Fecha de Inicio:</th>
+                  <td>{{ promocion.Fecha_inicio|date:"d/m/Y H:i" }}</td>
+                </tr>
+                <tr>
+                  <th>Fecha de Fin:</th>
+                  <td>{{ promocion.Fecha_fin|date:"d/m/Y H:i" }}</td>
+                </tr>
+                <tr>
+                  <th>Días Restantes:</th>
+                  <td>
+                    {% if promocion.dias_restantes > 0 %}
+                      <span class="badge bg-primary">{{ promocion.dias_restantes }} días</span>
+                    {% else %}
+                      <span class="text-muted">Finalizada</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Estado Actual:</th>
+                  <td>
+                    {% if promocion.esta_activa %}
+                      <span class="badge bg-success">✅ Actualmente Activa</span>
+                    {% else %}
+                      <span class="badge bg-secondary">❌ No Activa</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          {% if promocion.cantidad_minima %}
+            <div class="alert alert-info">
+              <strong>Cantidad Mínima:</strong> {{ promocion.cantidad_minima }} kg para aplicar la promoción
+            </div>
+          {% endif %}
+
+          {% if promocion.descripcion %}
+            <div class="mb-3">
+              <h5>Descripción</h5>
+              <p class="text-muted">{{ promocion.descripcion }}</p>
+            </div>
+          {% endif %}
+
+          <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="{% url 'promocion_update' promocion.Id_promocion %}" class="btn btn-success">
+              ✏️ Editar
+            </a>
+            <a href="{% url 'promocion_list' %}" class="btn btn-secondary">
+              ← Volver a la Lista
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

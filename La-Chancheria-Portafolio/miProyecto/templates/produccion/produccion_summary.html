@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Resumen Producción{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">Resumen: Producción #{{ produccion.Id_produccion }}</h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>📋 Receta:</strong> {{ produccion.receta.nombre }}</p>
+          <p><strong>🎯 Producto Final:</strong> 
+            {% if produccion.receta.producto_final %}
+              <span class="badge bg-success">{{ produccion.receta.producto_final.Corte }}</span>
+            {% else %}
+              <span class="badge bg-warning">⚠️ Sin vincular</span>
+            {% endif %}
+          </p>
+        </div>
+        <div class="col-md-6">
+          {% if produccion.receta.producto_final %}
+          <p><strong>📦 Cantidad a producir:</strong> <span class="badge bg-info">{{ produccion.cantidad_producida }} {{ produccion.receta.producto_final.get_unidad_medida_display|lower }}</span></p>
+          <p><strong>📉 Merma:</strong> <span class="badge bg-warning text-dark">{{ produccion.merma }} {{ produccion.receta.producto_final.get_unidad_medida_display|lower }}</span></p>
+          {% else %}
+          <p><strong>📦 Cantidad a producir:</strong> <span class="badge bg-info">{{ produccion.cantidad_producida }} (unidad desconocida)</span></p>
+          <p><strong>📉 Merma:</strong> <span class="badge bg-warning text-dark">{{ produccion.merma }} (unidad desconocida)</span></p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header bg-info text-white">
+      <h5 class="mb-0">📊 Ingredientes necesarios</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead>
+            <tr>
+              <th>Ingrediente</th>
+              <th>Requerido</th>
+              <th>Stock Actual</th>
+              <th>Saldo</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in detalles %}
+            <tr {% if d.sobrante < 0 %}class="table-danger"{% else %}class="table-light"{% endif %}>
+              <td><strong>{{ d.nombre }}</strong></td>
+              <td>
+                <span class="badge bg-primary">{{ d.requerido }} {{ d.unidad|lower }}</span>
+              </td>
+              <td>
+                <span class="badge bg-secondary">{{ d.stock }} {{ d.unidad|lower }}</span>
+              </td>
+              <td>
+                {% if d.sobrante >= 0 %}
+                  <span class="badge bg-success">✓ {{ d.sobrante }} {{ d.unidad|lower }}</span>
+                {% else %}
+                  <span class="badge bg-danger">✗ Faltan {{ d.sobrante|add:0|stringformat:".2f"|add:0|floatformat:"-2g" }} {{ d.unidad|lower }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if d.sobrante >= 0 %}
+                  <span class="badge bg-success">OK</span>
+                {% else %}
+                  <span class="badge bg-danger">⚠️ INSUFICIENTE</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% if faltantes %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <strong>⚠️ Hay insuficiencia de stock:</strong>
+      <ul class="mb-0 mt-2">
+        {% for f in faltantes %}
+          <li>{{ f }}</li>
+        {% endfor %}
+      </ul>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="{{ confirm_form.confirmar.id_for_label }}" class="form-label d-block">
+            {{ confirm_form.confirmar }}
+            {{ confirm_form.confirmar.label }}
+          </label>
+          {% if confirm_form.confirmar.errors %}
+            <div class="text-danger small">{{ confirm_form.confirmar.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="d-flex gap-2">
+          <button class="btn btn-success btn-lg" type="submit" {% if faltantes %}disabled{% endif %}>
+            ✓ Confirmar Producción y Aplicar Cambios
+          </button>
+          <a href="{% url 'produccion_list' %}" class="btn btn-secondary btn-lg">← Volver</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

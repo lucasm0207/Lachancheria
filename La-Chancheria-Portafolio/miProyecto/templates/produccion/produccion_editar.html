@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Producción{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>✏️ Editar Producción</h2>
+  <hr>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="d-flex justify-content-between">
+      <a href="{% url 'produccion_list' %}" class="btn btn-secondary">
+        🔙 Volver
+      </a>
+      <button type="submit" class="btn btn-success">
+        💾 Guardar Cambios
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

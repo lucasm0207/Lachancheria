@@ -1,0 +1,20 @@
+Documentación sobre Producción y Recetas:
+
+1. **Producción**:
+   - **Propósito**: El módulo de Producción permite gestionar y registrar las producciones realizadas en la empresa. Esto incluye el seguimiento de las recetas utilizadas, los productos finales obtenidos y los detalles de cada producción.
+   - **Funcionamiento**: Los usuarios pueden crear nuevas producciones especificando la receta utilizada, la cantidad producida y otros detalles relevantes. También pueden buscar producciones existentes utilizando filtros como la fecha de producción.
+   - **Detalles**:
+     - La tabla en `produccion_list.html` muestra información clave como el ID de la producción, la fecha, los detalles y las acciones disponibles.
+     - Las acciones incluyen la edición y eliminación de producciones.
+     - Se utiliza un sistema de colores para indicar el estado de cada producción (confirmada, anulada, etc.).
+   - **Importancia**: Este módulo es esencial para mantener un registro organizado de las actividades de producción, lo que facilita la trazabilidad y la planificación futura.
+
+2. **Recetas**:
+   - **Propósito**: El módulo de Recetas permite gestionar las recetas utilizadas en la producción. Esto incluye la definición de los ingredientes necesarios y las cantidades requeridas para cada receta.
+   - **Funcionamiento**: Los usuarios pueden crear, editar y eliminar recetas. También pueden buscar recetas existentes utilizando filtros como el nombre de la receta.
+   - **Detalles**:
+     - La tabla en `receta_list.html` muestra información clave como el ID de la receta, el nombre, los ingredientes y las acciones disponibles.
+     - Las acciones incluyen la edición y eliminación de recetas.
+   - **Importancia**: Este módulo asegura que las recetas estén bien documentadas y organizadas, lo que es crucial para garantizar la consistencia en la producción y el cumplimiento de los estándares de calidad.
+
+Ambos módulos están diseñados para ser intuitivos y fáciles de usar, con interfaces claras y opciones de filtrado para facilitar la navegación y la gestión de datos.

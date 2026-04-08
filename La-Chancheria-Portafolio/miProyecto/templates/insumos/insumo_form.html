@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Insumo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{% if form.instance.pk %}Editar Insumo: {{ form.instance.nombre }}{% else %}Registrar Nuevo Insumo{% endif %}</h4>
+                </div>
+                <div class="card-body">
+                    {% if form.instance.pk %}
+                    <div class="alert alert-info mb-3">
+                        <small>📦 Stock actual: <strong>{{ form.instance.Cantidad }} {{ form.instance.get_unidad_medida_display }}</strong>
+                        — El stock se gestiona a través de las compras.</small>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Error:</strong>
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}<span class="text-danger">*</span></label>
+                            {{ form.nombre }}
+                            {% if form.nombre.help_text %}<small class="text-muted">{{ form.nombre.help_text }}</small>{% endif %}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger small mt-1">{{ form.nombre.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tipo.id_for_label }}" class="form-label">{{ form.tipo.label }}<span class="text-danger">*</span></label>
+                                {{ form.tipo }}
+                                {% if form.tipo.help_text %}<small class="text-muted">{{ form.tipo.help_text }}</small>{% endif %}
+                                {% if form.tipo.errors %}
+                                    <div class="text-danger small mt-1">{{ form.tipo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.unidad_medida.id_for_label }}" class="form-label">{{ form.unidad_medida.label }}<span class="text-danger">*</span></label>
+                                {{ form.unidad_medida }}
+                                {% if form.unidad_medida.help_text %}<small class="text-muted">{{ form.unidad_medida.help_text }}</small>{% endif %}
+                                {% if form.unidad_medida.errors %}
+                                    <div class="text-danger small mt-1">{{ form.unidad_medida.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.categoria.id_for_label }}" class="form-label">{{ form.categoria.label }}</label>
+                            {{ form.categoria }}
+                            {% if form.categoria.help_text %}<small class="text-muted">{{ form.categoria.help_text }}</small>{% endif %}
+                            {% if form.categoria.errors %}
+                                <div class="text-danger small mt-1">{{ form.categoria.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="alert alert-light border mt-3">
+                            <small class="text-muted">
+                                ℹ️ El stock y el precio se gestionan a través de las <strong>compras</strong>. 
+                                Una vez creado el insumo, podrás registrar compras que actualicen el stock automáticamente.
+                            </small>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-success">{% if form.instance.pk %}Guardar Cambios{% else %}Crear Insumo{% endif %}</button>
+                            <a href="{% url 'insumo_list' %}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Promoción{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+          <h4 class="mb-0">⚠️ Confirmar Eliminación</h4>
+        </div>
+        <div class="card-body">
+          <p class="lead">¿Estás seguro de que deseas eliminar esta promoción?</p>
+          
+          <div class="alert alert-info">
+            <h5>Detalles de la promoción:</h5>
+            <ul class="mb-0">
+              <li><strong>Producto:</strong> {{ promocion.Id_producto.Corte }}</li>
+              <li><strong>Tipo:</strong> {{ promocion.get_tipo_promocion_display }}</li>
+              <li><strong>Precio Oferta:</strong> ${{ promocion.Precio_oferta }}</li>
+              <li><strong>Estado:</strong> {{ promocion.get_estado_display }}</li>
+              <li><strong>Vigencia:</strong> {{ promocion.Fecha_inicio|date:"d/m/Y" }} - {{ promocion.Fecha_fin|date:"d/m/Y" }}</li>
+            </ul>
+          </div>
+
+          <p class="text-danger">
+            <strong>Esta acción no se puede deshacer.</strong>
+          </p>
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-center gap-3">
+              <button type="submit" class="btn btn-danger">
+                🗑️ Sí, Eliminar
+              </button>
+              <a href="{% url 'promocion_list' %}" class="btn btn-secondary">
+                ❌ Cancelar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

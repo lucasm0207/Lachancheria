@@ -1,0 +1,19 @@
+﻿# Ignorar las librerías de Python dentro de miEntorno
+miEntorno/
+
+# Ignorar archivos de Python compilados
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Archivos de configuración de IDEs (como VSCode)
+.vscode/
+
+# Archivos de configuración de entornos (como PyCharm)
+.idea/
+
+# Archivos de configuración de sistema
+Thumbs.db
+#base de datos
+db.sqlite3

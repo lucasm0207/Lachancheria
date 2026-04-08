@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Eliminar Compra</h2>
+    <p>¿Estás seguro que querés eliminar la compra <strong>#{{ compra.Id_compra }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <a href="{% url 'compra_list' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+    </form>
+</div>
+{% endblock %}

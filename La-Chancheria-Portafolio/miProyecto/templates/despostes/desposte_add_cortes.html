@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cargar Cortes — Desposte #{{ desposte.Id_desposte }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+
+      {# ── Mensajes flash ── #}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {# ── Cabecera informativa del desposte ── #}
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">🔪 Desposte #{{ desposte.Id_desposte }} — Cargar Cortes</h4>
+          <span class="badge bg-light text-dark fs-6">{{ desposte.Fecha|date:"d/m/Y H:i" }}</span>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-md-3">
+              <div class="border rounded p-3 h-100">
+                <small class="text-muted d-block">🥩 Insumo</small>
+                <strong class="fs-5">{{ desposte.Id_insumo }}</strong>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-3 h-100">
+                <small class="text-muted d-block">📦 Unidades</small>
+                <strong class="fs-5">{{ desposte.Unidades }}</strong>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-3 h-100">
+                <small class="text-muted d-block">⚖️ Peso Inicial</small>
+                <strong class="fs-5">{{ desposte.Peso_inicial }} kg</strong>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-3 h-100" id="merma-card">
+                <small class="text-muted d-block">📉 Merma Estimada</small>
+                <strong class="fs-5" id="merma-display">{{ desposte.Peso_inicial }} kg</strong>
+                <br>
+                <span class="badge bg-secondary" id="merma-pct-badge">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# ── Formulario de cortes ── #}
+      <div class="card shadow">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">🍖 Cortes del Desposte</h5>
+          <button type="button" class="btn btn-light btn-sm" id="btn-add-corte">
+            ➕ Agregar Corte
+          </button>
+        </div>
+        <div class="card-body">
+
+          <form method="post" id="cortes-form" novalidate>
+            {% csrf_token %}
+
+            {# Errores globales del formset #}
+            {% if formset.non_form_errors %}
+              <div class="alert alert-danger">
+                <strong>⚠️ Error:</strong>
+                {% for error in formset.non_form_errors %}
+                  <p class="mb-0">{{ error }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {{ formset.management_form }}
+
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle" id="cortes-table">
+                <thead class="table-light text-center">
+                  <tr>
+                    <th style="width:5%">#</th>
+                    <th style="width:45%">🍖 Producto / Corte</th>
+                    <th style="width:25%">⚖️ Peso (kg)</th>
+                    <th style="width:15%">🗑️ Eliminar</th>
+                  </tr>
+                </thead>
+                <tbody id="cortes-body">
+                  {% for form in formset %}
+                  <tr class="corte-row" data-index="{{ forloop.counter0 }}">
+                    <td class="text-center fw-bold row-number">{{ forloop.counter }}</td>
+                    <td>
+                      {{ form.id }}
+                      {{ form.Id_producto }}
+                      {% if form.Id_producto.errors %}
+                        <div class="text-danger small mt-1">{{ form.Id_producto.errors|join:", " }}</div>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {{ form.Peso }}
+                      {% if form.Peso.errors %}
+                        <div class="text-danger small mt-1">{{ form.Peso.errors|join:", " }}</div>
+                      {% endif %}
+                    </td>
+                    <td class="text-center">
+                      {% if form.instance.pk %}
+                        {# Cortes existentes: checkbox de DELETE #}
+                        <div class="form-check d-flex justify-content-center">
+                          {{ form.DELETE }}
+                        </div>
+                      {% else %}
+                        {# Cortes nuevos: botón para quitar la fila #}
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-row">
+                          <i class="bi bi-x-lg"></i>
+                        </button>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+                <tfoot>
+                  <tr class="table-warning fw-bold text-center">
+                    <td colspan="2" class="text-end">Total Cortes:</td>
+                    <td id="total-cortes">0.00 kg</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            {# ── Resumen en vivo ── #}
+            <div class="row mt-3 mb-3">
+              <div class="col-md-4">
+                <div class="alert alert-info mb-0 text-center">
+                  <small>Peso Inicial</small>
+                  <div class="fs-5 fw-bold">{{ desposte.Peso_inicial }} kg</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="alert alert-success mb-0 text-center">
+                  <small>Total Cortes</small>
+                  <div class="fs-5 fw-bold" id="resumen-cortes">0.00 kg</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="alert mb-0 text-center" id="resumen-merma-alert">
+                  <small>Merma</small>
+                  <div class="fs-5 fw-bold" id="resumen-merma">{{ desposte.Peso_inicial }} kg</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 mt-4">
+              <button type="submit" class="btn btn-success btn-lg">
+                💾 Guardar Cortes
+              </button>
+              <a href="{% url 'desposte_list' %}" class="btn btn-secondary btn-lg">
+                ❌ Cancelar
+              </a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{# ── Fila plantilla (oculta) para clonar al agregar nuevos cortes ── #}
+<template id="empty-form-template">
+  <tr class="corte-row" data-index="__prefix__">
+    <td class="text-center fw-bold row-number"></td>
+    <td>{{ formset.empty_form.id }}{{ formset.empty_form.Id_producto }}</td>
+    <td>{{ formset.empty_form.Peso }}</td>
+    <td class="text-center">
+      <button type="button" class="btn btn-outline-danger btn-sm btn-remove-row">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </td>
+  </tr>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const PESO_INICIAL = parseFloat('{{ desposte.Peso_inicial }}') || 0;
+  const totalFormsInput = document.getElementById('id_cortes-TOTAL_FORMS');
+  const cortesBody = document.getElementById('cortes-body');
+  const emptyFormTemplate = document.getElementById('empty-form-template');
+
+  // ── Agregar nueva fila ──
+  document.getElementById('btn-add-corte').addEventListener('click', function () {
+    const totalForms = parseInt(totalFormsInput.value);
+    const templateHTML = emptyFormTemplate.innerHTML.replace(/__prefix__/g, totalForms);
+    const tempDiv = document.createElement('tbody');
+    tempDiv.innerHTML = templateHTML;
+    const newRow = tempDiv.querySelector('tr');
+    newRow.dataset.index = totalForms;
+    cortesBody.appendChild(newRow);
+    totalFormsInput.value = totalForms + 1;
+    attachRowEvents(newRow);
+    recalcular();
+    renumerarFilas();
+  });
+
+  // ── Eliminar fila nueva (sin pk) ──
+  function attachRowEvents(row) {
+    const btn = row.querySelector('.btn-remove-row');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        row.remove();
+        recalcular();
+        renumerarFilas();
+      });
+    }
+    // Evento peso
+    const pesoInput = row.querySelector('input[name$="-Peso"]');
+    if (pesoInput) {
+      pesoInput.addEventListener('input', recalcular);
+    }
+  }
+
+  // ── Inicializar eventos en filas existentes ──
+  cortesBody.querySelectorAll('.corte-row').forEach(function (row) {
+    attachRowEvents(row);
+    // También manejar el checkbox DELETE en filas existentes
+    const delCheck = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+    if (delCheck) {
+      delCheck.addEventListener('change', recalcular);
+    }
+  });
+
+  // ── Recalcular totales y merma ──
+  function recalcular() {
+    let total = 0;
+    cortesBody.querySelectorAll('.corte-row').forEach(function (row) {
+      // Si está marcada para eliminar, no sumar
+      const delCheck = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+      if (delCheck && delCheck.checked) return;
+      // Si la fila fue removida del DOM, no existe, pero por seguridad:
+      const pesoInput = row.querySelector('input[name$="-Peso"]');
+      if (pesoInput) {
+        const val = parseFloat(pesoInput.value) || 0;
+        if (val > 0) total += val;
+      }
+    });
+
+    const merma = PESO_INICIAL - total;
+    const mermaPct = PESO_INICIAL > 0 ? ((merma / PESO_INICIAL) * 100).toFixed(1) : 0;
+
+    // Actualizar displays
+    document.getElementById('total-cortes').textContent = total.toFixed(2) + ' kg';
+    document.getElementById('resumen-cortes').textContent = total.toFixed(2) + ' kg';
+    document.getElementById('merma-display').textContent = merma.toFixed(2) + ' kg';
+    document.getElementById('resumen-merma').textContent = merma.toFixed(2) + ' kg';
+    document.getElementById('merma-pct-badge').textContent = mermaPct + '%';
+
+    // Colores del card de merma
+    const mermaCard = document.getElementById('merma-card');
+    const mermaAlert = document.getElementById('resumen-merma-alert');
+    // Limpiar clases previas
+    mermaAlert.classList.remove('alert-warning', 'alert-danger', 'alert-success');
+
+    if (merma < 0) {
+      // Excede peso inicial
+      mermaCard.style.borderColor = '#dc3545';
+      mermaAlert.classList.add('alert-danger');
+      document.getElementById('merma-pct-badge').classList.replace('bg-secondary', 'bg-danger') ||
+        document.getElementById('merma-pct-badge').classList.add('bg-danger');
+      document.getElementById('merma-pct-badge').classList.remove('bg-secondary', 'bg-warning', 'bg-success');
+    } else if (mermaPct > 30) {
+      // Merma alta
+      mermaAlert.classList.add('alert-warning');
+      document.getElementById('merma-pct-badge').className = 'badge bg-warning text-dark';
+    } else {
+      // Normal
+      mermaAlert.classList.add('alert-success');
+      document.getElementById('merma-pct-badge').className = 'badge bg-success';
+    }
+  }
+
+  // ── Renumerar filas visibles ──
+  function renumerarFilas() {
+    let num = 1;
+    cortesBody.querySelectorAll('.corte-row').forEach(function (row) {
+      const numCell = row.querySelector('.row-number');
+      if (numCell) numCell.textContent = num++;
+    });
+  }
+
+  // Cálculo inicial
+  recalcular();
+});
+</script>
+{% endblock %}

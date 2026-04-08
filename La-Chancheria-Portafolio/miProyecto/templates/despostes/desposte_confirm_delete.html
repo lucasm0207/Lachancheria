@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Eliminar Desposte</h2>
+    <p>¿Estás seguro que querés eliminar el desposte de {{ desposte.Id_insumo }} con peso inicial {{ desposte.Peso_inicial }} kg?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+        <a href="{% url 'desposte_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

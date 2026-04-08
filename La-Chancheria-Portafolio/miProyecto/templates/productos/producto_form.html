@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo|default:'Nuevo Producto' }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📦 {{ titulo|default:'Nuevo Producto' }}</h2>
+        <a href="{% url 'producto_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la lista
+        </a>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Detalles del Producto</h5>
+                </div>
+                
+                <div class="card-body p-4 bg-light">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        {% for field in form %}
+                            <div class="mb-3 bg-white p-3 rounded border" {% if field.name == 'Corte' %}id="corte-container"{% endif %}>
+                                <label for="{{ field.id_for_label }}" class="form-label fw-bold text-dark"
+                                    {% if field.name == 'Precio_kilo' %}id="label_precio"{% endif %}
+                                    {% if field.name == 'precio_mayor_x_kg' %}id="label_precio_mayor"{% endif %}
+                                    {% if field.name == 'stock_kg' %}id="label_stock"{% endif %}>
+                                    {{ field.label }}
+                                </label>
+                                
+                                {{ field }}
+                                
+                                {% if field.help_text %}
+                                    <div class="form-text text-muted mt-2"
+                                        {% if field.name == 'Precio_kilo' %}id="help_precio"{% endif %}
+                                        {% if field.name == 'stock_kg' %}id="help_stock"{% endif %}>
+                                        <small><i class="bi bi-info-circle me-1"></i>{{ field.help_text }}</small>
+                                    </div>
+                                {% endif %}
+                                
+                                {% for error in field.errors %}
+                                    <div class="text-danger mt-1 small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'producto_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="reset" class="btn btn-outline-warning">Limpiar</button>
+                            <button type="submit" class="btn btn-success fw-bold">
+                                <i class="bi bi-check-circle me-2"></i> Guardar Producto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categoriaSelect = document.getElementById('id_Id_categoria');
+    const unidadSelect = document.getElementById('id_unidad_medida');
+    const corteInput = document.getElementById('id_Corte');
+    const corteContainer = document.getElementById('corte-container');
+    
+    if (!categoriaSelect || !unidadSelect) return;
+    
+    // Categorías que requieren el campo "Corte"
+    const categoriasConCortes = ['BROSA', 'TERNERA', 'POLLO', 'PESCADO', 'CHACINADOS'];
+    
+    // Guardar todas las opciones originales
+    const todasLasUnidades = Array.from(unidadSelect.options).map(opt => ({
+        value: opt.value,
+        text: opt.text
+    }));
+    
+    // Mapeo de códigos de unidades a nombres legibles
+    const nombresUnidades = {
+        'KG': 'Kilogramo',
+        'UNIDAD': 'Unidad',
+        'PAQUETE': 'Paquete'
+    };
+    
+    function actualizarLabelsPrecios() {
+        const unidadSeleccionada = unidadSelect.value;
+        const nombreUnidad = nombresUnidades[unidadSeleccionada] || 'Unidad';
+        
+        const labelPrecio = document.getElementById('label_precio');
+        const labelPrecioMayor = document.getElementById('label_precio_mayor');
+        const labelStock = document.getElementById('label_stock');
+        
+        if (labelPrecio) labelPrecio.textContent = `💰 Precio por ${nombreUnidad}`;
+        if (labelPrecioMayor) labelPrecioMayor.textContent = `💵 Precio Mayorista por ${nombreUnidad}`;
+        if (labelStock) labelStock.textContent = `📦 Stock (en ${nombresUnidades[unidadSeleccionada] || 'unidades'})`;
+        
+        const helpPrecio = document.getElementById('help_precio');
+        const helpStock = document.getElementById('help_stock');
+        
+        if (helpPrecio) helpPrecio.innerHTML = `<small><i class="bi bi-info-circle me-1"></i>Precio de venta por ${nombreUnidad.toLowerCase()}</small>`;
+        if (helpStock) helpStock.innerHTML = `<small><i class="bi bi-info-circle me-1"></i>Cantidad disponible en ${nombresUnidades[unidadSeleccionada]?.toLowerCase() || 'unidades'}</small>`;
+    }
+    
+    function controlarCampoCorte() {
+        if (!corteContainer || !corteInput) return;
+        
+        const categoriaTexto = categoriaSelect.options[categoriaSelect.selectedIndex]?.text.toUpperCase() || '';
+        const requiereCorte = categoriasConCortes.some(cat => categoriaTexto.includes(cat));
+        
+        if (requiereCorte) {
+            corteContainer.style.display = 'block';
+            corteInput.removeAttribute('disabled');
+        } else {
+            corteContainer.style.display = 'none';
+            corteInput.setAttribute('disabled', 'disabled');
+            corteInput.value = '';
+        }
+    }
+    
+    function restaurarTodasLasUnidades() {
+        unidadSelect.innerHTML = '';
+        todasLasUnidades.forEach(unidad => {
+            const option = document.createElement('option');
+            option.value = unidad.value;
+            option.textContent = unidad.text;
+            unidadSelect.appendChild(option);
+        });
+    }
+    
+    categoriaSelect.addEventListener('change', function() {
+        controlarCampoCorte();
+    });
+    
+    unidadSelect.addEventListener('change', function() {
+        actualizarLabelsPrecios();
+    });
+    
+    // Inicializar al cargar
+    controlarCampoCorte();
+    actualizarLabelsPrecios();
+});
+</script>
+{% endblock %}

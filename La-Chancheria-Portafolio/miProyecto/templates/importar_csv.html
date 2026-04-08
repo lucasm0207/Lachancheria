@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Importar CSV - La Chanchería{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4 text-center">Importar archivos CSV</h2>
+  <p class="text-center text-muted">Selecciona el tipo de datos que deseas importar y sube tu archivo CSV.</p>
+
+  <div class="row justify-content-center mt-4">
+    <!-- CSV Clientes -->
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Clientes</h5>
+        </div>
+        <div class="card-body text-center">
+          <form action="{% url 'importar_clientes' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="csv_file" class="form-control mb-3" accept=".csv" required>
+            <button type="submit" class="btn btn-success w-100">Subir CSV Clientes</button>
+          </form>
+          <a href="{% url 'clientes_list' %}" class="btn btn-secondary w-100 mt-2">
+            <i class="fas fa-arrow-left"></i> Volver a Clientes
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- CSV Productos/Compras -->
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Productos/Compras</h5>
+        </div>
+        <div class="card-body text-center">
+          <form action="{% url 'importar_productos' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="csv_file" class="form-control mb-3" accept=".csv" required>
+            <button type="submit" class="btn btn-success w-100">Subir CSV Productos</button>
+          </form>
+          <a href="{% url 'productos_list' %}" class="btn btn-secondary w-100 mt-2">
+            <i class="fas fa-arrow-left"></i> Volver a Productos
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- CSV Ventas -->
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Ventas</h5>
+        </div>
+        <div class="card-body text-center">
+          <form action="{% url 'importar_ventas' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="csv_file" class="form-control mb-3" accept=".csv" required>
+            <button type="submit" class="btn btn-success w-100">Subir CSV Ventas</button>
+          </form>
+          <a href="{% url 'ventas_list' %}" class="btn btn-secondary w-100 mt-2">
+            <i class="fas fa-arrow-left"></i> Volver a Ventas
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

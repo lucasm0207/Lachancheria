@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Receta: {{ receta.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📖 Receta: {{ receta.nombre }}</h2>
+    <div>
+      <a href="{% url 'receta_update' receta.pk %}" class="btn btn-success me-2">✏️ Editar</a>
+      <a href="{% url 'receta_delete' receta.pk %}" class="btn btn-danger">🗑️ Eliminar</a>
+    </div>
+  </div>
+
+  <div class="card p-4 mb-4">
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>🎯 Producto final:</strong> 
+          {% if receta.producto_final %}
+            <span class="badge bg-success">{{ receta.producto_final.Corte }}</span>
+          {% else %}
+            <span class="badge bg-warning">⚠️ Sin vincular</span>
+          {% endif %}
+        </p>
+        <p><strong>📦 Rendimiento por lote:</strong> 
+          <span class="badge bg-info">
+            {{ receta.rendimiento_por_lote }} 
+            {% if receta.producto_final %}
+              {{ receta.producto_final.get_unidad_medida_display|lower }}
+            {% endif %}
+          </span>
+        </p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>📝 Notas:</strong></p>
+        <p class="text-muted">{{ receta.notas|default:"Sin notas" }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header bg-secondary text-white">
+      <h5 class="mb-0">📋 Ingredientes</h5>
+    </div>
+    <div class="card-body">
+      {% if receta.items.all %}
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead>
+            <tr>
+              <th>Ingrediente</th>
+              <th>Tipo</th>
+              <th>Cantidad por Lote</th>
+              <th>Orden</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in receta.items.all %}
+            <tr>
+              <td>
+                <strong>
+                  {% if it.insumo %}
+                    {{ it.insumo.nombre }}
+                  {% else %}
+                    {{ it.producto.Corte }}
+                  {% endif %}
+                </strong>
+              </td>
+              <td>
+                <span class="badge bg-info">{{ it.get_tipo_item_display }}</span>
+              </td>
+              <td>
+                <span class="badge bg-primary">
+                  {{ it.cantidad_por_rendimiento }}
+                  {% if it.insumo %}
+                    {{ it.insumo.get_unidad_medida_display|lower }}
+                  {% else %}
+                    {{ it.producto.get_unidad_medida_display|lower }}
+                  {% endif %}
+                </span>
+              </td>
+              <td><small class="text-muted">#{{ it.orden }}</small></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-info">No hay ingredientes agregados a esta receta.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <a href="{% url 'receta_list' %}" class="btn btn-secondary">← Volver a Recetas</a>
+</div>
+{% endblock %}

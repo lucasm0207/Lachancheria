@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+```
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>📦 Detalle de Producción</h2>
+    <a href="{% url 'produccion_list' %}" class="btn btn-outline-secondary">
+        ← Volver
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+        Información General
+    </div>
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <p><strong>ID:</strong> {{ produccion.id }}</p>
+            </div>
+
+            <div class="col-md-4">
+                <p><strong>Receta:</strong> {{ produccion.receta }}</p>
+            </div>
+
+            <div class="col-md-4">
+                <p><strong>Cantidad:</strong> {{ produccion.cantidad }}</p>
+            </div>
+
+            <div class="col-md-4">
+                <p><strong>Fecha:</strong> {{ produccion.fecha }}</p>
+            </div>
+
+            <div class="col-md-4">
+                <p>
+                    <strong>Estado:</strong>
+
+                    {% if produccion.estado == "borrador" %}
+                        <span class="badge bg-warning text-dark">Borrador</span>
+                    {% elif produccion.estado == "confirmada" %}
+                        <span class="badge bg-success">Confirmada</span>
+                    {% elif produccion.estado == "anulada" %}
+                        <span class="badge bg-danger">Anulada</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ produccion.estado }}</span>
+                    {% endif %}
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="card shadow-sm">
+
+    <div class="card-header bg-secondary text-white">
+        Ingredientes Utilizados
+    </div>
+
+    <div class="card-body p-0">
+
+        <table class="table table-striped table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for d in detalles %}
+                <tr>
+                    <td>{{ d }}</td>
+                    <td>{{ d.cantidad }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center text-muted">
+                        No hay detalles registrados.
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+
+    {% if produccion.estado == "borrador" %}
+
+    <a href="{% url 'produccion_update' produccion.pk %}" class="btn btn-warning">
+        ✏️ Editar
+    </a>
+
+    <a href="{% url 'produccion_delete' produccion.pk %}" class="btn btn-danger">
+        🗑️ Eliminar
+    </a>
+
+    {% endif %}
+
+    {% if produccion.estado == "confirmada" %}
+
+    {% endif %}
+
+</div>
+```
+
+</div>
+
+{% endblock %}

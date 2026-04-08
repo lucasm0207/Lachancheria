@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Usuario — BeefControl{% endblock %}
+
+{% block content %}
+<div class="content-card" style="max-width: 500px; margin: auto;">
+  <h3 class="text-danger mb-4">
+    <i class="fas fa-exclamation-triangle me-2"></i>Eliminar Usuario
+  </h3>
+
+  <div class="alert alert-danger">
+    <p class="mb-0">¿Estás seguro de que deseas eliminar al usuario <strong>{{ usuario.username }}</strong>?</p>
+    <p class="mb-0 mt-2"><small>Esta acción no se puede deshacer.</small></p>
+  </div>
+
+  <div class="p-3 bg-light rounded mb-4">
+    <div class="d-flex align-items-center">
+      <div style="width:50px;height:50px;border-radius:50%;background:#dee2e6;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;margin-right:15px;">
+        {{ usuario.username|slice:":1"|upper }}
+      </div>
+      <div>
+        <strong>{{ usuario.username }}</strong><br>
+        <small class="text-muted">{{ usuario.email|default:"Sin email" }}</small>
+        {% for grupo in usuario.groups.all %}
+          <br><span class="badge bg-secondary">{{ grupo.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="d-flex justify-content-between">
+      <a href="{% url 'gestion_usuarios' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Cancelar
+      </a>
+      <button type="submit" class="btn btn-danger">
+        <i class="fas fa-trash me-1"></i> Sí, Eliminar
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

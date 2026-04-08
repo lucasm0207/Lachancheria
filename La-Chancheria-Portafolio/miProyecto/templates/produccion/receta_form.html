@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo|default:'Nueva Receta' }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📋 {{ titulo|default:'Nueva Receta' }}</h2>
+        <a href="{% url 'receta_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la lista
+        </a>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Card de Datos de la Receta -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Detalles de la Receta</h5>
+                    </div>
+                    
+                    <div class="card-body p-4 bg-light">
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3 bg-white p-3 rounded border">
+                                    <label for="{{ form.nombre.id_for_label }}" class="form-label fw-bold text-dark">
+                                        🏷️ {{ form.nombre.label }}
+                                    </label>
+                                    {{ form.nombre }}
+                                    {% for error in form.nombre.errors %}
+                                        <div class="text-danger mt-1 small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3 bg-white p-3 rounded border">
+                                    <label for="{{ form.producto_final.id_for_label }}" class="form-label fw-bold text-dark">
+                                        📦 {{ form.producto_final.label }}
+                                    </label>
+                                    {{ form.producto_final }}
+                                    {% for error in form.producto_final.errors %}
+                                        <div class="text-danger mt-1 small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3 bg-white p-3 rounded border">
+                                    <label for="{{ form.rendimiento_por_lote.id_for_label }}" class="form-label fw-bold text-dark">
+                                        📊 {{ form.rendimiento_por_lote.label }}
+                                    </label>
+                                    {{ form.rendimiento_por_lote }}
+                                    {% for error in form.rendimiento_por_lote.errors %}
+                                        <div class="text-danger mt-1 small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="mb-3 bg-white p-3 rounded border">
+                                    <label for="{{ form.notas.id_for_label }}" class="form-label fw-bold text-dark">
+                                        📝 {{ form.notas.label }}
+                                    </label>
+                                    {{ form.notas }}
+                                    {% for error in form.notas.errors %}
+                                        <div class="text-danger mt-1 small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card de Ingredientes -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i> 🥘 Ingredientes</h5>
+                    </div>
+                    
+                    <div class="card-body p-4 bg-light">
+                        {{ formset.management_form }}
+
+                        {% if formset.non_form_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <strong>Errores en el formset:</strong>
+                                <ul>
+                                    {% for error in formset.non_form_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered bg-white" id="ingredientes-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width:12%">Tipo</th>
+                                        <th style="width:35%">Ingrediente</th>
+                                        <th style="width:28%">Cantidad por lote</th>
+                                        <th style="width:8%">Orden</th>
+                                        <th style="width:10%">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for f in formset %}
+                                    <tr class="ingrediente-row {% if f.non_field_errors %}table-danger{% endif %}">
+                                        {% for hidden in f.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+                                        <td class="tipo-col">{{ f.tipo_item }}</td>
+                                        <td class="ingrediente-col d-flex gap-2 align-items-center">
+                                            <div class="w-50">{{ f.insumo }}</div>
+                                            <div class="w-50">{{ f.producto }}</div>
+                                        </td>
+                                        <td>
+                                            {{ f.cantidad_por_rendimiento }}
+                                            <small class="text-muted ms-2">
+                                                {% if f.instance.insumo %}
+                                                    {{ f.instance.insumo.get_unidad_medida_display|lower }}
+                                                {% elif f.instance.producto %}
+                                                    {{ f.instance.producto.get_unidad_medida_display|lower }}
+                                                {% else %}
+                                                    (unidad)
+                                                {% endif %}
+                                            </small>
+                                            {% if f.cantidad_por_rendimiento.errors %}
+                                                <div class="text-danger small">{{ f.cantidad_por_rendimiento.errors.0 }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ f.orden }}</td>
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center align-items-center">
+                                                {% if f.DELETE %}{{ f.DELETE }}{% endif %}
+                                                <button type="button" class="btn btn-sm btn-danger ms-2 remove-row">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% if f.non_field_errors %}
+                                    <tr class="table-danger">
+                                        <td colspan="5">
+                                            <small class="text-danger">
+                                                {% for error in f.non_field_errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <button type="button" class="btn btn-primary" id="add-ingrediente">
+                                <i class="bi bi-plus-circle me-1"></i> Agregar ingrediente
+                            </button>
+                            <small class="text-muted">Usá la columna "Borrar" para marcar un ingrediente para eliminación antes de guardar.</small>
+                        </div>
+
+                        <!-- template para nueva fila -->
+                        <div id="empty-form-template" style="display:none;">
+                            <table>
+                                <tbody>
+                                    <tr class="ingrediente-row">
+                                        {% for hidden in formset.empty_form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+                                        <td class="tipo-col">{{ formset.empty_form.tipo_item }}</td>
+                                        <td class="ingrediente-col d-flex gap-2 align-items-center">
+                                            <div class="w-50">{{ formset.empty_form.insumo }}</div>
+                                            <div class="w-50">{{ formset.empty_form.producto }}</div>
+                                        </td>
+                                        <td>{{ formset.empty_form.cantidad_por_rendimiento }} <small class="text-muted">(unidad)</small></td>
+                                        <td>{{ formset.empty_form.orden }}</td>
+                                        <td class="text-center">{{ formset.empty_form.DELETE }} <button type="button" class="btn btn-sm btn-danger ms-2 remove-row"><i class="bi bi-trash"></i></button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <hr class="my-3">
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'receta_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="reset" class="btn btn-outline-warning">Limpiar</button>
+                    <button type="submit" class="btn btn-success fw-bold">
+                        <i class="bi bi-check-circle me-2"></i> Guardar Receta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+(function(){
+    const addBtn = document.getElementById('add-ingrediente');
+    const tableBody = document.querySelector('#ingredientes-table tbody');
+    const emptyTpl = document.getElementById('empty-form-template').innerHTML;
+
+    function getTotalFormsInput(){
+        return document.querySelector('input[name$="-TOTAL_FORMS"]');
+    }
+
+    function updateElementIndex(html, index){
+        return html.replace(/__prefix__/g, index);
+    }
+
+    function attachRowBehavior(row){
+        const tipo = row.querySelector('select[name$="-tipo_item"]');
+        const insumoWrap = row.querySelector('.ingrediente-col .w-50:first-child');
+        const productoWrap = row.querySelector('.ingrediente-col .w-50:last-child');
+        const insumoSelect = row.querySelector('select[name$="-insumo"]');
+        const productoSelect = row.querySelector('select[name$="-producto"]');
+        const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+
+        function refreshVisibility(){
+            const val = tipo ? tipo.value : '';
+            if(val === 'insumo'){
+                if(insumoWrap) insumoWrap.style.display = '';
+                if(productoWrap) productoWrap.style.display = 'none';
+                if(productoSelect) productoSelect.value = '';
+            } else if(val === 'producto'){
+                if(insumoWrap) insumoWrap.style.display = 'none';
+                if(productoWrap) productoWrap.style.display = '';
+                if(insumoSelect) insumoSelect.value = '';
+            } else {
+                if(insumoWrap) insumoWrap.style.display = '';
+                if(productoWrap) productoWrap.style.display = '';
+            }
+        }
+
+        if(tipo){
+            tipo.addEventListener('change', refreshVisibility);
+            refreshVisibility();
+        }
+
+        const removeBtn = row.querySelector('.remove-row');
+        if(removeBtn){
+            removeBtn.addEventListener('click', function(){
+                if(deleteCheckbox){
+                    deleteCheckbox.checked = true;
+                    row.classList.add('table-danger');
+                } else {
+                    row.remove();
+                }
+            });
+        }
+    }
+
+    document.querySelectorAll('#ingredientes-table tbody tr.ingrediente-row').forEach(function(r){
+        attachRowBehavior(r);
+    });
+
+    addBtn.addEventListener('click', function(){
+        const totalFormsInput = getTotalFormsInput();
+        let formIndex = parseInt(totalFormsInput.value, 10);
+        let newRowHtml = updateElementIndex(emptyTpl, formIndex);
+        const wrapper = document.createElement('tbody');
+        wrapper.innerHTML = newRowHtml;
+        const newRow = wrapper.querySelector('tr');
+        tableBody.appendChild(newRow);
+        totalFormsInput.value = formIndex + 1;
+        attachRowBehavior(newRow);
+    });
+})();
+</script>
+{% endblock %}

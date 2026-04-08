@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}BeefControl - Inicio{% endblock %}
+
+{% block header_title %}Inicio{% endblock %}
+
+{% block body_class %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <!-- Simple hero: background image + centered title -->
+  <div class="dashboard-hero hero-simple">
+    <div class="hero-center">
+      <h1 class="hero-title">BeefControl</h1>
+    </div>
+  </div>
+  <div class="hero-actions text-center mt-3">
+    <a href="{% url 'receta_list' %}" class="btn btn-primary mx-2">Recetas</a>
+    <a href="{% url 'produccion_list' %}" class="btn btn-primary mx-2">Producciones</a>
+  </div>
+
+  <div class="dashboard-grid">
+    <div>
+      <div class="content-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <h4 class="card-title">Secciones</h4>
+          <a href="#" class="text-muted">Ver todo</a>
+        </div>
+
+        <div class="cards-grid mt-3">
+          <div class="dash-card">
+            <a href="{% url 'cliente_list' %}">
+              <div class="dash-icon"><i class="fas fa-users"></i></div>
+              <div class="dash-title">Clientes</div>
+              <div class="dash-text">Lista y gestión de clientes</div>
+            </a>
+          </div>
+
+          <div class="dash-card">
+            <a href="{% url 'producto_list' %}">
+              <div class="dash-icon"><i class="fas fa-box"></i></div>
+              <div class="dash-title">Inventario</div>
+              <div class="dash-text">Productos y stock</div>
+            </a>
+          </div>
+
+          <div class="dash-card">
+            <a href="{% url 'venta_list' %}">
+              <div class="dash-icon"><i class="fas fa-cash-register"></i></div>
+              <div class="dash-title">Ventas</div>
+              <div class="dash-text">Historial y registros</div>
+            </a>
+          </div>
+
+          <div class="dash-card">
+            <a href="{% url 'compra_list' %}">
+              <div class="dash-icon"><i class="fas fa-cart-plus"></i></div>
+              <div class="dash-title">Compras</div>
+              <div class="dash-text">Entradas de insumos y carne</div>
+            </a>
+          </div>
+
+          <div class="dash-card">
+            <a href="{% url 'proveedor_list' %}">
+              <div class="dash-icon"><i class="fas fa-truck"></i></div>
+              <div class="dash-title">Proveedores</div>
+              <div class="dash-text">Contactos y compras</div>
+            </a>
+          </div>
+
+          <div class="dash-card">
+            <a href="{% url 'promocion_list' %}">
+              <div class="dash-icon"><i class="fas fa-fire"></i></div>
+              <div class="dash-title">Promociones</div>
+              <div class="dash-text">Productos en promoción</div>
+            </a>
+          </div>
+          <div class="dash-card">
+            <a href="{% url 'receta_list' %}">
+              <div class="dash-icon"><i class="fas fa-book-open"></i></div>
+              <div class="dash-title">Recetas</div>
+              <div class="dash-text">Gestión de recetas y fórmulas</div>
+            </a>
+          </div>
+
+          <div class="dash-card">
+            <a href="{% url 'produccion_list' %}">
+              <div class="dash-icon"><i class="fas fa-industry"></i></div>
+              <div class="dash-title">Producciones</div>
+              <div class="dash-text">Registrar y confirmar producciones</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card mt-3">
+        <h5 class="card-title">En curso</h5>
+        <div class="cards-grid mt-3">
+          <div class="dash-card">
+            <a href="{% url 'desposte_list' %}">
+              <div class="dash-icon"><i class="fas fa-cut"></i></div>
+              <div class="dash-title">Despostes</div>
+              <div class="dash-text">Cortes y asignaciones</div>
+            </a>
+          </div>
+          <div class="dash-card">
+            <a href="{% url 'insumo_list' %}">
+              <div class="dash-icon"><i class="fas fa-boxes-stacked"></i></div>
+              <div class="dash-title">Insumos</div>
+              <div class="dash-text">Gestión de insumos</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="right-panel">
+      <div class="panel-section content-card top-buyers">
+        <h5 class="card-title">Mayores compradores del mes</h5>
+        {% if top_buyers %}
+          {% for buyer in top_buyers %}
+            <div class="buyer-item">
+              <div>{{ forloop.counter }}. {{ buyer.nombre }}</div>
+              <div><strong>{{ buyer.total|default:"0" }}</strong></div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="sin-compras">Sin datos por el momento.</p>
+        {% endif %}
+      </div>
+
+      <div class="panel-section content-card">
+        <h5 class="card-title">Promociones</h5>
+        {% if promociones %}
+          {% for p in promociones %}
+            <div class="promo-item">
+              <div class="promo-content">
+                <div style="font-weight:700">{{ p.nombre }}</div>
+                <div class="text-muted">{{ p.precio|default:"" }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="sin-compras">No hay promociones activas.</p>
+        {% endif %}
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

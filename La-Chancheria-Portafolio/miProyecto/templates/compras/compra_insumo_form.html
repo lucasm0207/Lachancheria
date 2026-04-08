@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo|default:'Compra de Insumos' }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📦 {{ titulo|default:'Compra de Insumos' }}</h2>
+    <a href="{% url 'compra_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a la lista
+    </a>
+</div>
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endif %}
+
+<form method="post">
+{% csrf_token %}
+
+<!-- DATOS COMPRA -->
+<div class="row justify-content-center mb-4">
+<div class="col-md-10">
+
+<div class="card shadow-sm border-0">
+
+<div class="card-header bg-dark text-white">
+<h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Datos de la Compra</h5>
+</div>
+
+<div class="card-body p-4 bg-light">
+
+<div class="row">
+
+<div class="col-md-4">
+<div class="mb-3 bg-white p-3 rounded border">
+<label class="form-label fw-bold">🏪 Proveedor</label>
+{{ form.Id_proveedor }}
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="mb-3 bg-white p-3 rounded border">
+<label class="form-label fw-bold">💳 Forma de Pago</label>
+{{ form.Forma_pago }}
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="mb-3 bg-white p-3 rounded border">
+<label class="form-label fw-bold">💰 Monto Pagado</label>
+{{ form.monto_pagado }}
+<small class="text-muted">Dejar en 0 si queda como deuda</small>
+</div>
+</div>
+
+</div>
+
+<input type="hidden" name="Tipo_compra" value="INSUMO">
+<input type="hidden" name="Estado" value="completado">
+
+</div>
+</div>
+</div>
+</div>
+
+{{ detalle_formset.management_form }}
+
+<!-- DETALLE INSUMOS -->
+<div class="row justify-content-center mb-4">
+<div class="col-md-10">
+
+<div class="card shadow-sm border-0">
+
+<div class="card-header bg-dark text-white">
+<h5 class="mb-0"><i class="bi bi-list-check me-2"></i> Detalle de Insumos</h5>
+</div>
+
+<div class="card-body p-4 bg-light">
+
+<div id="detalles">
+
+{% for form in detalle_formset.forms %}
+
+<div class="detalle mb-3 bg-white p-3 rounded border">
+
+{{ form.Id_detalle }}
+
+<div class="row align-items-end">
+
+<div class="col-md-3">
+<label class="form-label fw-bold">📋 {{ form.Id_insumo.label }}</label>
+{{ form.Id_insumo }}
+</div>
+
+<div class="col-md-2">
+<label class="form-label fw-bold">📦 {{ form.Cantidad.label }}</label>
+{{ form.Cantidad }}
+</div>
+
+<div class="col-md-2">
+<label class="form-label fw-bold">💰 {{ form.Precio_total.label }}</label>
+{{ form.Precio_total }}
+</div>
+
+<div class="col-md-3">
+<label class="form-label fw-bold">🛒 Producto asociado</label>
+{{ form.producto_asociado }}
+<small class="text-muted">
+Si este insumo se vende directamente (vino, leña, bebida)
+</small>
+</div>
+
+<div class="col-md-2 text-center">
+<span style="display:none;">{{ form.DELETE }}</span>
+
+<button type="button" class="btn btn-danger btn-sm eliminar-detalle">
+<i class="bi bi-trash"></i>
+</button>
+
+</div>
+
+</div>
+</div>
+
+{% endfor %}
+
+</div>
+
+<button type="button" id="agregar-detalle" class="btn btn-primary w-100 mt-3">
+<i class="bi bi-plus-circle"></i> Agregar detalle
+</button>
+
+</div>
+</div>
+</div>
+</div>
+
+<!-- BOTONES -->
+
+<div class="row justify-content-center">
+<div class="col-md-10">
+
+<hr>
+
+<div class="d-flex justify-content-end gap-2">
+
+<a href="{% url 'compra_list' %}" class="btn btn-outline-secondary">
+Cancelar
+</a>
+
+<button type="reset" class="btn btn-outline-warning">
+Limpiar
+</button>
+
+<button type="submit" class="btn btn-success fw-bold">
+<i class="bi bi-check-circle"></i> Guardar Compra
+</button>
+
+</div>
+</div>
+</div>
+
+</form>
+</div>
+
+
+<!-- TEMPLATE JS PARA NUEVAS FILAS -->
+
+<div id="empty-form-template" style="display:none;">
+
+<div class="row align-items-end">
+
+{{ detalle_formset.empty_form.Id_detalle }}
+
+<div class="col-md-3">
+<label class="form-label fw-bold">📋 Insumo</label>
+{{ detalle_formset.empty_form.Id_insumo }}
+</div>
+
+<div class="col-md-2">
+<label class="form-label fw-bold">📦 Cantidad</label>
+{{ detalle_formset.empty_form.Cantidad }}
+</div>
+
+<div class="col-md-2">
+<label class="form-label fw-bold">💰 Precio total</label>
+{{ detalle_formset.empty_form.Precio_total }}
+</div>
+
+<div class="col-md-3">
+<label class="form-label fw-bold">🛒 Producto asociado</label>
+{{ detalle_formset.empty_form.producto_asociado }}
+</div>
+
+<div class="col-md-2 text-center">
+
+<span style="display:none;">
+{{ detalle_formset.empty_form.DELETE }}
+</span>
+
+<button type="button" class="btn btn-danger btn-sm eliminar-detalle">
+<i class="bi bi-trash"></i>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<script>
+
+function getTotalFormsInput(){
+return document.querySelector('input[name$="-TOTAL_FORMS"]')
+}
+
+function addDetalle(){
+
+const totalFormsInput = getTotalFormsInput()
+
+const index = parseInt(totalFormsInput.value)
+
+const template = document
+.getElementById("empty-form-template")
+.innerHTML.replace(/__prefix__/g,index)
+
+const div = document.createElement("div")
+
+div.className="detalle mb-3 bg-white p-3 rounded border"
+
+div.innerHTML=template
+
+document.getElementById("detalles").appendChild(div)
+
+totalFormsInput.value=index+1
+
+}
+
+document
+.getElementById("agregar-detalle")
+.addEventListener("click",addDetalle)
+
+
+document
+.getElementById("detalles")
+.addEventListener("click",function(e){
+
+if(e.target.closest(".eliminar-detalle")){
+
+const detalle=e.target.closest(".detalle")
+
+const delInput=detalle.querySelector("input[type=checkbox]")
+
+if(delInput){
+
+delInput.checked=true
+detalle.style.display="none"
+
+}else{
+
+detalle.remove()
+
+}
+
+}
+
+})
+
+</script>
+
+{% endblock %}

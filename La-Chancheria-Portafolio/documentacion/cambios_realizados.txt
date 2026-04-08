@@ -1,0 +1,19 @@
+Cambios realizados en los archivos:
+
+1. **insumo_list.html**:
+   - Se actualizó el diseño y estilo para que coincida con el de `producto_list.html`.
+   - Se agregó un panel de filtros con opciones para buscar por nombre y unidad de medida.
+   - Se incluyó una tabla con las siguientes columnas: ID, Insumo, Unidad de Medida, Stock Disponible y Acciones.
+   - Se añadieron botones para editar y eliminar insumos.
+
+2. **produccion_list.html**:
+   - Se actualizó el diseño y estilo para que coincida con el de `producto_list.html`.
+   - Se agregó un panel de filtros con opciones para buscar por fecha de producción.
+   - Se incluyó una tabla con las siguientes columnas: ID, Fecha, Detalles y Acciones.
+   - Se añadieron botones para editar y eliminar producciones.
+
+3. **receta_list.html**:
+   - Se creó un nuevo archivo basado en el diseño de `producto_list.html`.
+   - Se agregó un panel de filtros con opciones para buscar por nombre de receta.
+   - Se incluyó una tabla con las siguientes columnas: ID, Nombre, Ingredientes y Acciones.
+   - Se añadieron botones para editar y eliminar recetas.

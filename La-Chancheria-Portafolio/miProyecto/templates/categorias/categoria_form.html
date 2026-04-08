@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo|default:'Nueva Categoría' }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📁 {{ titulo|default:'Nueva Categoría' }}</h2>
+        <a href="{% url 'categoria_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la lista
+        </a>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Detalles de la Categoría</h5>
+                </div>
+                
+                <div class="card-body p-4 bg-light">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="{{ form.Categoria.id_for_label }}" class="form-label fw-bold text-dark">
+                                🏷️ {{ form.Categoria.label }}
+                            </label>
+                            {{ form.Categoria }}
+                            {% if form.Categoria.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.Categoria.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.Categoria.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold text-dark">
+                                📝 {{ form.descripcion.label }}
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.descripcion.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.descripcion.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="{{ form.unidades_permitidas.id_for_label }}" class="form-label fw-bold text-dark">
+                                📏 {{ form.unidades_permitidas.label }}
+                            </label>
+                            {{ form.unidades_permitidas }}
+                            {% if form.unidades_permitidas.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.unidades_permitidas.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.unidades_permitidas.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="{{ form.Cantidad.id_for_label }}" class="form-label fw-bold text-dark">
+                                📦 {{ form.Cantidad.label }}
+                            </label>
+                            {{ form.Cantidad }}
+                            {% if form.Cantidad.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.Cantidad.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.Cantidad.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'categoria_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="reset" class="btn btn-outline-warning">Limpiar</button>
+                            <button type="submit" class="btn btn-success fw-bold">
+                                <i class="bi bi-check-circle me-2"></i> Guardar Categoría
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}{{ insumo.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Tarjeta principal -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">{{ insumo.nombre }}</h3>
+                    <div>
+                        {% if insumo.tipo == 'CARNE' %}
+                            <span class="badge bg-danger me-2">🥩 Carne</span>
+                        {% else %}
+                            <span class="badge bg-secondary me-2">📦 Insumo</span>
+                        {% endif %}
+                        <span class="badge bg-info">{{ insumo.get_unidad_medida_display }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card text-center {% if insumo.Cantidad == 0 %}border-danger{% elif insumo.stock_bajo %}border-warning{% else %}border-success{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Stock Disponible</h6>
+                                    <h2 class="{% if insumo.Cantidad == 0 %}text-danger{% elif insumo.stock_bajo %}text-warning{% else %}text-success{% endif %}">
+                                        {{ insumo.Cantidad }} <small>{{ insumo.get_unidad_medida_display|lower }}</small>
+                                    </h2>
+                                    {% if insumo.Cantidad == 0 %}
+                                        <span class="badge bg-danger">Sin stock</span>
+                                    {% elif insumo.stock_bajo %}
+                                        <span class="badge bg-warning text-dark">⚠️ Stock bajo (&lt; 100 kg)</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Disponible</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th>Categoría:</th>
+                                    <td>
+                                        {% if insumo.categoria %}
+                                            {{ insumo.categoria.Categoria }}
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha de Ingreso:</th>
+                                    <td>{{ insumo.fecha_ingreso|date:"d/m/Y" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-flex flex-column gap-2">
+                                <a href="{% url 'insumo_update' insumo.pk %}" class="btn btn-success">✏️ Editar</a>
+                                <a href="{% url 'insumo_delete' insumo.pk %}" class="btn btn-danger">🗑️ Eliminar</a>
+                                <a href="{% url 'insumo_list' %}" class="btn btn-secondary">← Volver</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de compras -->
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📋 Historial de Compras</h5>
+                    <a href="{% url 'compra_insumo_create' %}" class="btn btn-sm btn-primary">➕ Nueva Compra</a>
+                </div>
+                <div class="card-body">
+                    {% if detalles_compra %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Proveedor</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Total</th>
+                                    <th>Estado Pago</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dc in detalles_compra %}
+                                <tr>
+                                    <td>{{ dc.Id_compra.Fecha_compra|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if dc.Id_compra.Id_proveedor %}
+                                            {{ dc.Id_compra.Id_proveedor.Nombre }}
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ dc.Cantidad }} {{ insumo.get_unidad_medida_display|lower }}</td>
+                                    <td class="fw-bold">${{ dc.Precio_total }}</td>
+                                    <td>
+                                        {% if dc.Id_compra.esta_pagada %}
+                                            <span class="badge bg-success">Pagada</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center mb-0">
+                        No se han registrado compras para este insumo.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

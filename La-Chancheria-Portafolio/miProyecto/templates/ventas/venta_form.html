@@ -1,0 +1,426 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ modo }} Venta{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">🛒 {{ modo }} Venta</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" novalidate id="venta-form">
+            {% csrf_token %}
+
+            <!-- Mensaje de error general -->
+            {% if venta_form.non_field_errors or detalle_formset.non_form_errors %}
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>⚠️ Error:</strong>
+                {{ venta_form.non_field_errors }}
+                {{ detalle_formset.non_form_errors }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endif %}
+
+            <div class="card mb-4">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">📋 Datos de la Venta</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6 col-lg-3 mb-3">
+                    <label class="form-label fw-bold">👤 Cliente <span class="text-danger">*</span></label>
+                    {{ venta_form.Id_cliente }}
+                    {% if venta_form.Id_cliente.errors %}
+                      <div class="text-danger small mt-1">⚠️ {{ venta_form.Id_cliente.errors|join:", " }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6 col-lg-3 mb-3">
+                    <label class="form-label fw-bold">🏷️ Tipo de Venta <span class="text-danger">*</span></label>
+                    {{ venta_form.Tipo_venta }}
+                    {% if venta_form.Tipo_venta.errors %}
+                      <div class="text-danger small mt-1">⚠️ {{ venta_form.Tipo_venta.errors|join:", " }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6 col-lg-3 mb-3">
+                    <label class="form-label fw-bold">💳 Forma de Pago <span class="text-danger">*</span></label>
+                    {{ venta_form.Forma_pago }}
+                    {% if venta_form.Forma_pago.errors %}
+                      <div class="text-danger small mt-1">⚠️ {{ venta_form.Forma_pago.errors|join:", " }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6 col-lg-3 mb-3">
+                    <label class="form-label fw-bold">📊 Estado <span class="text-danger">*</span></label>
+                    {{ venta_form.Estado }}
+                    {% if venta_form.Estado.errors %}
+                      <div class="text-danger small mt-1">⚠️ {{ venta_form.Estado.errors|join:", " }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {{ detalle_formset.management_form }}
+
+            <div class="card mb-4">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">🥩 Detalles de la Venta</h5>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered align-middle text-center" id="detalles-table">
+                    <thead class="table-light">
+                      <tr>
+                        <th>📦 Producto</th>
+                        <th>🔢 Cantidad</th>
+                        <th>💰 Subtotal</th>
+                        <th>⚙️ Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="detalles-body">
+                      {% for form in detalle_formset %}
+                        <tr class="detalle-item" data-form-index="{{ forloop.counter0 }}">
+                          <td style="display:none;">
+                            {{ form.Id_detalle }}
+                            {{ form.Id_venta }}
+                            {{ form.DELETE }}
+                          </td>
+                          <td>
+                            <select name="{{ form.Id_producto.html_name }}" id="{{ form.Id_producto.id_for_label }}" class="form-select producto-select" required>
+                              <option value="">--- Seleccionar producto ---</option>
+                              {% for producto in productos %}
+                                <option value="{{ producto.Id_producto }}" 
+                                        data-precio="{{ producto.Precio_kilo }}"
+                                        data-precio-mayor="{{ producto.precio_mayor_x_kg|default_if_none:'' }}"
+                                        data-stock="{{ producto.stock_display }}"
+                                        data-unidad="{{ producto.get_unidad_medida_display }}"
+                                        data-unidad-code="{{ producto.unidad_medida }}"
+                                {% if form.Id_producto.value|stringformat:'s' == producto.Id_producto|stringformat:'s' %}selected{% endif %}>
+                                  {% if producto.Corte %}{{ producto.Corte }}{% else %}{{ producto.Nombre }}{% endif %} ({{ producto.get_unidad_medida_display }}) - Stock: {{ producto.stock_display }}
+                                </option>
+                              {% endfor %}
+                            </select>
+                            {{ form.Id_producto.errors }}
+                          </td>
+                          <td>
+                            <input type="number" name="{{ form.Cantidad.html_name }}" id="{{ form.Cantidad.id_for_label }}" 
+                                   class="form-control cantidad-input" value="{{ form.Cantidad.value|default:'1' }}" 
+                                   step="any" min="0" required>
+                            <small class="text-muted unidad-medida-label"></small>
+                            {{ form.Cantidad.errors }}
+                          </td>
+                          <td>
+                            <input type="number" name="{{ form.Precio_total.html_name }}" id="{{ form.Precio_total.id_for_label }}" 
+                                   class="form-control subtotal-input" value="{{ form.Precio_total.value|default:'0' }}" 
+                                   step="0.01" readonly>
+                            {{ form.Precio_total.errors }}
+                          </td>
+                          <td>
+                            <button type="button" class="btn btn-danger btn-sm eliminar-detalle">🗑️ Quitar</button>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                <button type="button" id="add-detalle" class="btn btn-outline-success">
+                  ➕ Agregar producto
+                </button>
+              </div>
+            </div>
+
+            <div class="card mb-4 bg-light">
+              <div class="card-body text-center">
+                <h5 class="mb-2">💵 Total de la Venta</h5>
+                <p id="venta-total" class="fs-2 fw-bold text-success mb-0">$0.00</p>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 mb-4">
+              <button type="submit" class="btn btn-success btn-lg" id="btn-guardar">
+                💾 Guardar Venta
+              </button>
+              <a href="{% url 'venta_list' %}" class="btn btn-secondary btn-lg">
+                ❌ Cancelar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alerta de error flotante -->
+<div id="error-toast" class="position-fixed top-0 end-0 p-3" style="z-index: 9999; display: none;">
+  <div class="toast show bg-danger text-white" role="alert">
+    <div class="toast-header bg-danger text-white">
+      <strong class="me-auto">⚠️ Error de validación</strong>
+      <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('error-toast').style.display='none'"></button>
+    </div>
+    <div class="toast-body" id="error-message">
+      Por favor complete todos los campos requeridos.
+    </div>
+  </div>
+</div>
+
+<!-- Template oculto para nuevas filas -->
+<table style="display:none">
+  <tbody>
+    <tr id="empty-form-row" class="detalle-item">
+      <td style="display:none;">
+        <input type="hidden" name="detalle_venta_set-__prefix__-Id_detalle" id="id_detalle_venta_set-__prefix__-Id_detalle" value="">
+        <input type="hidden" name="detalle_venta_set-__prefix__-Id_venta" id="id_detalle_venta_set-__prefix__-Id_venta" value="">
+      </td>
+      <td>
+        <select name="detalle_venta_set-__prefix__-Id_producto" id="id_detalle_venta_set-__prefix__-Id_producto" class="form-select producto-select" required>
+          <option value="">--- Seleccionar producto ---</option>
+          {% for producto in productos %}
+            <option value="{{ producto.Id_producto }}" 
+                    data-precio="{{ producto.Precio_kilo }}"
+                    data-precio-mayor="{{ producto.precio_mayor_x_kg|default_if_none:'' }}"
+                    data-stock="{{ producto.stock_display }}"
+                    data-unidad="{{ producto.get_unidad_medida_display }}"
+                    data-unidad-code="{{ producto.unidad_medida }}">
+              {% if producto.Corte %}{{ producto.Corte }}{% else %}{{ producto.Nombre }}{% endif %} ({{ producto.get_unidad_medida_display }}) - Stock: {{ producto.stock_display }}
+            </option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <input type="number" name="detalle_venta_set-__prefix__-Cantidad" id="id_detalle_venta_set-__prefix__-Cantidad" class="form-control cantidad-input" value="1" step="any" min="0" required>
+        <small class="text-muted unidad-medida-label"></small>
+      </td>
+      <td>
+        <input type="number" name="detalle_venta_set-__prefix__-Precio_total" id="id_detalle_venta_set-__prefix__-Precio_total" class="form-control subtotal-input" value="0.00" step="0.01" readonly>
+      </td>
+      <td>
+        <button type="button" class="btn btn-danger btn-sm eliminar-detalle">🗑️</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const totalElement  = document.getElementById("venta-total");
+  const addBtn        = document.getElementById("add-detalle");
+  const tbody         = document.getElementById("detalles-body");
+  const totalFormsInput = document.querySelector("input[name$='-TOTAL_FORMS']");
+  const emptyRowTemplate = document.getElementById("empty-form-row").outerHTML;
+  const ventaForm     = document.getElementById("venta-form");
+  const errorToast    = document.getElementById("error-toast");
+  const errorMessage  = document.getElementById("error-message");
+  const tipoVentaSelect = document.querySelector('[name="Tipo_venta"]');
+
+  // Ya no se usa porcentaje fijo: el precio mayorista viene del producto
+
+  // ── Utilidades ──────────────────────────────────────────────
+  function mostrarError(mensaje) {
+    errorMessage.textContent = mensaje;
+    errorToast.style.display = 'block';
+    setTimeout(() => { errorToast.style.display = 'none'; }, 5000);
+  }
+
+  function marcarError(elemento, mensaje) {
+    elemento.classList.add('is-invalid');
+    let errorDiv = elemento.parentNode.querySelector('.invalid-feedback');
+    if (!errorDiv) {
+      errorDiv = document.createElement('div');
+      errorDiv.className = 'invalid-feedback';
+      elemento.parentNode.appendChild(errorDiv);
+    }
+    errorDiv.textContent = mensaje;
+  }
+
+  function limpiarErrores() {
+    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+  }
+
+  // ── Ajustar step/min del input cantidad según unidad de medida ──
+  function ajustarInputCantidad(row) {
+    const select = row.querySelector(".producto-select");
+    const cantidadInput = row.querySelector(".cantidad-input");
+    if (!select || !cantidadInput || !select.value) return;
+
+    const opt = select.selectedOptions[0];
+    const unidadCode = opt ? opt.dataset.unidadCode : '';
+
+    if (unidadCode === 'UNIDAD' || unidadCode === 'PAQUETE') {
+      cantidadInput.setAttribute('step', '1');
+      cantidadInput.setAttribute('min', '1');
+      // Redondear a entero si tiene decimales
+      const val = parseFloat(cantidadInput.value);
+      if (val && val !== Math.floor(val)) {
+        cantidadInput.value = Math.max(1, Math.round(val));
+      }
+    } else {
+      // KG: permitir 3 decimales
+      cantidadInput.setAttribute('step', '0.001');
+      cantidadInput.setAttribute('min', '0.001');
+    }
+  }
+
+  // ── Tipo de venta actual ────────────────────────────────────
+  function esMayor() {
+    return tipoVentaSelect && tipoVentaSelect.value === 'mayor';
+  }
+
+  // ── Validación al enviar ────────────────────────────────────
+  ventaForm.addEventListener('submit', function(e) {
+    limpiarErrores();
+    let errores = [];
+
+    const clienteSelect = document.querySelector('[name="Id_cliente"]');
+    if (!clienteSelect.value) {
+      marcarError(clienteSelect, 'Seleccione un cliente');
+      errores.push('Cliente');
+    }
+
+    let hayProductoValido = false;
+    document.querySelectorAll("tr.detalle-item").forEach(row => {
+      if (row.style.display === "none") return;
+      const select = row.querySelector(".producto-select");
+      const cantidadInput = row.querySelector(".cantidad-input");
+
+      if (select && select.value && select.value !== "") {
+        hayProductoValido = true;
+        const val = parseFloat(cantidadInput.value);
+        if (isNaN(val) || val <= 0) {
+          marcarError(cantidadInput, 'Cantidad debe ser mayor a 0');
+          errores.push('Cantidad del producto');
+        } else {
+          const unidadCode = select.selectedOptions[0] ? select.selectedOptions[0].dataset.unidadCode : '';
+          if ((unidadCode === 'UNIDAD' || unidadCode === 'PAQUETE') && val !== Math.floor(val)) {
+            marcarError(cantidadInput, 'Solo cantidades enteras para este producto');
+            errores.push('Cantidad debe ser entera');
+          }
+        }
+      }
+    });
+
+    if (!hayProductoValido) {
+      errores.push('Debe agregar al menos un producto');
+      mostrarError('⚠️ Debe seleccionar al menos un producto para la venta');
+      e.preventDefault();
+      return;
+    }
+
+    if (errores.length > 0) {
+      mostrarError('⚠️ Por favor complete los campos: ' + errores.join(', '));
+      e.preventDefault();
+      return;
+    }
+  });
+
+  // ── Cálculo de totales ──────────────────────────────────────
+  function actualizarUnidadMedida(row) {
+    const select = row.querySelector(".producto-select");
+    const unidadLabel = row.querySelector(".unidad-medida-label");
+    if (select && unidadLabel && select.value) {
+      const unidad = select.selectedOptions[0].dataset.unidad || '';
+      unidadLabel.textContent = unidad;
+    }
+  }
+
+  function calcularTotales() {
+    let totalVenta = 0;
+    const mayor = esMayor();
+
+    document.querySelectorAll("tr.detalle-item").forEach(row => {
+      if (row.style.display === "none") return;
+
+      const select       = row.querySelector(".producto-select");
+      const cantidadInput = row.querySelector(".cantidad-input");
+      const subtotalInput = row.querySelector(".subtotal-input");
+      if (!select || !cantidadInput || !subtotalInput) return;
+
+      if (!select.value || select.value === "") {
+        subtotalInput.value = "0.00";
+        const lbl = row.querySelector(".unidad-medida-label");
+        if (lbl) lbl.textContent = "";
+        return;
+      }
+
+      actualizarUnidadMedida(row);
+
+      const opt      = select.selectedOptions[0];
+      let precio     = parseFloat(opt.dataset.precio || 0);
+      const cantidad = parseFloat(cantidadInput.value) || 0;
+
+      // Venta mayor → usar precio mayorista si existe, sino precio normal
+      if (mayor) {
+        const precioMayor = parseFloat(opt.dataset.precioMayor);
+        if (!isNaN(precioMayor) && precioMayor > 0) {
+          precio = precioMayor;
+        }
+        // Si no tiene precio mayorista, se mantiene el precio normal
+      }
+
+      const subtotal = precio * cantidad;
+      subtotalInput.value = subtotal.toFixed(2);
+      totalVenta += subtotal;
+    });
+
+    totalElement.textContent = '$' + totalVenta.toFixed(2);
+  }
+
+  // ── Agregar fila ────────────────────────────────────────────
+  addBtn.addEventListener("click", function () {
+    const currentCount = parseInt(totalFormsInput.value, 10);
+    const wrapper = document.createElement("tbody");
+    let newRowHtml = emptyRowTemplate.replace(/__prefix__/g, currentCount);
+    wrapper.innerHTML = newRowHtml;
+    const newRow = wrapper.querySelector("tr");
+    tbody.appendChild(newRow);
+    totalFormsInput.value = currentCount + 1;
+    calcularTotales();
+  });
+
+  // ── Eliminar fila ───────────────────────────────────────────
+  document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("eliminar-detalle")) {
+      const row = e.target.closest("tr");
+      if (!row) return;
+      const deleteInput = row.querySelector("input[type='checkbox'][name$='-DELETE']");
+      if (deleteInput) {
+        deleteInput.checked = true;
+        row.style.display = "none";
+      } else {
+        row.remove();
+      }
+      calcularTotales();
+    }
+  });
+
+  // ── Eventos de recálculo ────────────────────────────────────
+  // Cantidad: recalcular al escribir (sin bloquear el input)
+  document.addEventListener("input", e => {
+    if (e.target.matches(".cantidad-input")) calcularTotales();
+  });
+
+  // Producto seleccionado: recalcular totales y ajustar step de cantidad
+  document.addEventListener("change", e => {
+    if (e.target.matches(".producto-select")) {
+      const row = e.target.closest("tr");
+      if (row) ajustarInputCantidad(row);
+      calcularTotales();
+    }
+  });
+
+  // Tipo de venta: recalcular al cambiar (aplica/quita descuento 15 %)
+  if (tipoVentaSelect) {
+    tipoVentaSelect.addEventListener("change", calcularTotales);
+  }
+
+  // Ajustar step en filas existentes al cargar
+  document.querySelectorAll("tr.detalle-item").forEach(row => ajustarInputCantidad(row));
+
+  calcularTotales();
+});
+</script>
+{% endblock %}

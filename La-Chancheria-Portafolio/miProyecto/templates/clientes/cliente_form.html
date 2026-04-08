@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo|default:'Nuevo Cliente' }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>👤 {{ titulo|default:'Nuevo Cliente' }}</h2>
+        <a href="{% url 'cliente_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la lista
+        </a>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Detalles del Cliente</h5>
+                </div>
+                
+                <div class="card-body p-4 bg-light">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="id_Nombre" class="form-label fw-bold text-dark">
+                                🏷️ Nombre
+                            </label>
+                            {{ form.Nombre }}
+                            {% if form.Nombre.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.Nombre.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.Nombre.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="id_Telefono" class="form-label fw-bold text-dark">
+                                📞 Teléfono
+                            </label>
+                            {{ form.Telefono }}
+                            {% if form.Telefono.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.Telefono.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.Telefono.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="id_Direccion" class="form-label fw-bold text-dark">
+                                📍 Dirección
+                            </label>
+                            {{ form.Direccion }}
+                            {% if form.Direccion.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.Direccion.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.Direccion.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="id_Email" class="form-label fw-bold text-dark">
+                                ✉️ Email
+                            </label>
+                            {{ form.Email }}
+                            {% if form.Email.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.Email.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.Email.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'cliente_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="reset" class="btn btn-outline-warning">Limpiar</button>
+                            <button type="submit" class="btn btn-success fw-bold">
+                                <i class="bi bi-check-circle me-2"></i> Guardar Cliente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

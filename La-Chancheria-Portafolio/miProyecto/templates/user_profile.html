@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil — BeefControl{% endblock %}
+
+{% block content %}
+<div class="content-card">
+  <div class="d-flex align-items-center gap-3">
+    <div style="width:80px;height:80px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:28px;">{{ user.username|slice:":1"|upper }}</div>
+    <div>
+      <h4>{{ user.get_full_name|default:user.username }}</h4>
+      <div class="text-muted">{{ user.email }}</div>
+      <div class="mt-2">
+        {% for grupo in user.groups.all %}
+          {% if grupo.name == 'admin' %}
+            <span class="badge bg-danger">{{ grupo.name }}</span>
+          {% elif grupo.name == 'cajero' %}
+            <span class="badge bg-success">{{ grupo.name }}</span>
+          {% elif grupo.name == 'despostador' %}
+            <span class="badge bg-warning text-dark">{{ grupo.name }}</span>
+          {% elif grupo.name == 'inventario' %}
+            <span class="badge bg-info">{{ grupo.name }}</span>
+          {% else %}
+            <span class="badge bg-secondary">{{ grupo.name }}</span>
+          {% endif %}
+        {% empty %}
+          <span class="badge bg-secondary">Sin rol asignado</span>
+        {% endfor %}
+        {% if user.is_superuser %}
+          <span class="badge" style="background:#6f42c1;color:white;">Superusuario</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <hr>
+  
+  <h5 class="card-title mt-3">Tu nivel de acceso</h5>
+  <div class="alert alert-info">
+    {% for grupo in user.groups.all %}
+      {% if grupo.name == 'admin' %}
+        <i class="fas fa-shield-alt me-2"></i> <strong>Administrador:</strong> Tienes acceso completo a todas las funciones del sistema.
+      {% elif grupo.name == 'cajero' %}
+        <i class="fas fa-cash-register me-2"></i> <strong>Cajero:</strong> Puedes gestionar ventas, clientes y promociones.
+      {% elif grupo.name == 'despostador' %}
+        <i class="fas fa-cut me-2"></i> <strong>Despostador:</strong> Puedes gestionar despostes, productos, categorías e insumos.
+      {% elif grupo.name == 'inventario' %}
+        <i class="fas fa-boxes me-2"></i> <strong>Inventario:</strong> Puedes gestionar productos, compras, proveedores e insumos.
+      {% else %}
+        <i class="fas fa-user me-2"></i> <strong>{{ grupo.name }}:</strong> Rol personalizado.
+      {% endif %}
+    {% empty %}
+      <i class="fas fa-exclamation-circle me-2"></i> No tienes un rol asignado. Contacta al administrador para obtener acceso.
+    {% endfor %}
+  </div>
+
+  <h5 class="card-title mt-3">Ajustes de cuenta</h5>
+  <p>Esta es una página simple de perfil. Puedes ampliar para editar el perfil del usuario, cambiar contraseña y más.</p>
+  
+  <div class="mt-4">
+    <a href="{% url 'index' %}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Volver al inicio
+    </a>
+  </div>
+</div>
+{% endblock %}

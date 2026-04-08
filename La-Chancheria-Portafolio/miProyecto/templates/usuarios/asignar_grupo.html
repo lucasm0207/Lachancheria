@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Asignar Rol — {{ usuario.username }}{% endblock %}
+
+{% block content %}
+<div class="content-card" style="max-width: 600px; margin: auto;">
+  <h3 class="mb-4">
+    <i class="fas fa-user-tag me-2"></i>Asignar Rol a Usuario
+  </h3>
+
+  <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+    <div style="width:60px;height:60px;border-radius:50%;background:#dee2e6;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;margin-right:15px;">
+      {{ usuario.username|slice:":1"|upper }}
+    </div>
+    <div>
+      <h5 class="mb-0">{{ usuario.username }}</h5>
+      <small class="text-muted">{{ usuario.email|default:"Sin email" }}</small>
+      {% if grupo_actual %}
+        <br><span class="badge bg-secondary mt-1">Rol actual: {{ grupo_actual.name }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="mb-4">
+      <label class="form-label fw-bold">Seleccionar Rol:</label>
+      
+      <div class="list-group">
+        <label class="list-group-item list-group-item-action d-flex align-items-center">
+          <input type="radio" name="grupo" value="" class="form-check-input me-3" 
+                 {% if not grupo_actual %}checked{% endif %}>
+          <div>
+            <span class="badge bg-secondary me-2">Sin rol</span>
+            <small class="text-muted">Sin acceso especial</small>
+          </div>
+        </label>
+
+        {% for grupo in grupos %}
+        <label class="list-group-item list-group-item-action d-flex align-items-center">
+          <input type="radio" name="grupo" value="{{ grupo.id }}" class="form-check-input me-3"
+                 {% if grupo_actual and grupo_actual.id == grupo.id %}checked{% endif %}>
+          <div>
+            {% if grupo.name == 'admin' %}
+              <span class="badge bg-danger me-2">{{ grupo.name }}</span>
+              <small class="text-muted">Acceso completo al sistema</small>
+            {% elif grupo.name == 'cajero' %}
+              <span class="badge bg-success me-2">{{ grupo.name }}</span>
+              <small class="text-muted">Ventas, clientes, promociones</small>
+            {% elif grupo.name == 'despostador' %}
+              <span class="badge bg-warning text-dark me-2">{{ grupo.name }}</span>
+              <small class="text-muted">Despostes, productos, categorías, insumos</small>
+            {% elif grupo.name == 'inventario' %}
+              <span class="badge bg-info me-2">{{ grupo.name }}</span>
+              <small class="text-muted">Productos, compras, proveedores, insumos</small>
+            {% else %}
+              <span class="badge bg-secondary me-2">{{ grupo.name }}</span>
+            {% endif %}
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <a href="{% url 'gestion_usuarios' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Cancelar
+      </a>
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save me-1"></i> Guardar Rol
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

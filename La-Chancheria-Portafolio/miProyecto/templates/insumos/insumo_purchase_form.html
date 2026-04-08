@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ titulo }}</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <hr>
+  {{ detalle_formset.management_form }}
+  {% for form in detalle_formset.forms %}
+    <div class="detalle mb-3 p-3 border rounded">
+      {{ form.insumo_id.label_tag }} {{ form.insumo_id }}
+      {{ form.Cantidad.label_tag }} {{ form.Cantidad }}
+      {{ form.Precio_total.label_tag }} {{ form.Precio_total }}
+      {{ form.DELETE }} <label>Eliminar</label>
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">Guardar Compra</button>
+</form>
+{% endblock %}

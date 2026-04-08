@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">🔪 {% if update %}Editar Desposte{% else %}Nuevo Desposte{% endif %}</h4>
+                </div>
+                <div class="card-body">
+
+                    {# Mensajes flash de Django #}
+                    {% if messages %}
+                      {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+                          {{ message }}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                      {% endfor %}
+                    {% endif %}
+
+                    <form method="post" novalidate id="desposte-form">
+                        {% csrf_token %}
+
+                        {# Errores no campo (clean() del form) #}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                <strong>⚠️ Error:</strong> {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.Id_insumo.id_for_label }}" class="form-label fw-bold">
+                                🥩 Insumo de Carne <span class="text-danger">*</span>
+                            </label>
+                            {{ form.Id_insumo }}
+                            <small class="text-muted">Seleccione el insumo de carne (media res, cerdo, pollo, etc.)</small>
+                            {% if form.Id_insumo.errors %}
+                              <div class="text-danger small mt-1">⚠️ {{ form.Id_insumo.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.Unidades.id_for_label }}" class="form-label fw-bold">
+                                📦 Unidades (Unidad de Faena) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.Unidades }}
+                            <small class="text-muted">Cantidad de medias res / pollos a despostar</small>
+                            {% if form.Unidades.errors %}
+                              <div class="text-danger small mt-1">⚠️ {{ form.Unidades.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.Peso_inicial.id_for_label }}" class="form-label fw-bold">
+                                ⚖️ Peso inicial total (kg) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.Peso_inicial }}
+                            <small class="text-muted">Peso total en kilogramos antes del desposte</small>
+                            {% if form.Peso_inicial.errors %}
+                              <div class="text-danger small mt-1">⚠️ {{ form.Peso_inicial.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        {# Si la vista pasa un formset (p. ej. para editar cortes en la misma vista), lo mostramos aquí #}
+                        {% if formset %}
+                            <hr class="my-4">
+                            <h5 class="mb-3">🥩 Cortes del Desposte</h5>
+
+                            {% if formset.non_form_errors %}
+                              <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+                            {% endif %}
+
+                            {{ formset.management_form }}
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered text-center align-middle">
+                                  <thead class="table-light">
+                                    <tr>
+                                      <th>🍖 Corte</th>
+                                      <th>⚖️ Peso (kg)</th>
+                                      <th>🗑️ Eliminar</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {% for f in formset %}
+                                    <tr>
+                                      <td>
+                                        {{ f.Id_producto }}
+                                        {% if f.Id_producto.errors %}
+                                          <div class="text-danger small">{{ f.Id_producto.errors|join:", " }}</div>
+                                        {% endif %}
+                                      </td>
+                                      <td>
+                                        {{ f.Peso }}
+                                        {% if f.Peso.errors %}
+                                          <div class="text-danger small">{{ f.Peso.errors|join:", " }}</div>
+                                        {% endif %}
+                                      </td>
+                                      <td>
+                                        {% if f.DELETE %}
+                                          {{ f.DELETE }}
+                                        {% endif %}
+                                      </td>
+                                    </tr>
+                                    {% endfor %}
+                                  </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-center gap-3 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                💾 {% if update %}Actualizar{% else %}Crear{% endif %}
+                            </button>
+                            <a href="{% url 'desposte_list' %}" class="btn btn-secondary btn-lg">
+                                ❌ Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerta de error flotante -->
+<div id="error-toast" class="position-fixed top-0 end-0 p-3" style="z-index: 9999; display: none;">
+  <div class="toast show bg-danger text-white" role="alert">
+    <div class="toast-header bg-danger text-white">
+      <strong class="me-auto">⚠️ Error de validación</strong>
+      <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('error-toast').style.display='none'"></button>
+    </div>
+    <div class="toast-body" id="error-message">
+      Por favor complete todos los campos requeridos.
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const errorToast = document.getElementById('error-toast');
+    const errorMessage = document.getElementById('error-message');
+
+    function mostrarError(mensaje) {
+        errorMessage.textContent = mensaje;
+        errorToast.style.display = 'block';
+        setTimeout(() => {
+            errorToast.style.display = 'none';
+        }, 5000);
+    }
+
+    const form = document.getElementById('desposte-form');
+    form.addEventListener('submit', function(e) {
+        let errores = [];
+
+        const insumo = document.querySelector('select[name="Id_insumo"]');
+        if (!insumo.value) {
+            errores.push('Insumo de Carne');
+            insumo.classList.add('is-invalid');
+        } else {
+            insumo.classList.remove('is-invalid');
+        }
+
+        const unidades = document.querySelector('input[name="Unidades"]');
+        if (!unidades.value || parseInt(unidades.value) < 1) {
+            errores.push('Unidades');
+            unidades.classList.add('is-invalid');
+        } else {
+            unidades.classList.remove('is-invalid');
+        }
+
+        const peso = document.querySelector('input[name="Peso_inicial"]');
+        if (!peso.value || parseFloat(peso.value) <= 0) {
+            errores.push('Peso inicial');
+            peso.classList.add('is-invalid');
+        } else {
+            peso.classList.remove('is-invalid');
+        }
+
+        if (errores.length > 0) {
+            e.preventDefault();
+            mostrarError('⚠️ Campos requeridos: ' + errores.join(', '));
+        }
+    });
+});
+</script>
+{% endblock %}

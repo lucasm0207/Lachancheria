@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Importar ventas desde CSV</h2>
+
+<!-- Mensajes que aparecen solo una vez -->
+{% if messages %}
+  {% for message in messages %}
+    <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  
+  <label for="{{ form.archivo_csv.id_for_label }}">Seleccioná el archivo CSV:</label>
+  {{ form.archivo_csv }}
+  
+  <br><br>
+  <button type="submit">Subir</button>
+</form>
+{% endblock %}

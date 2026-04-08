@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ modo }} Promoción{% endblock %}
+
+{% block content %}
+<style>
+  /* Asegurar que los labels sean negros */
+  .card-body label,
+  .form-label {
+    color: #000000 !important;
+    font-weight: 500;
+  }
+  
+  .card-header h4 {
+    color: #ffffff !important;
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">{{ titulo }}</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+              </div>
+            {% endif %}
+
+            <div class="row">
+              <!-- Producto -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.Id_producto.label }} *</label>
+                {{ form.Id_producto }}
+                {% if form.Id_producto.errors %}
+                  <div class="text-danger">{{ form.Id_producto.errors }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Tipo de Promoción -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.tipo_promocion.label }} *</label>
+                {{ form.tipo_promocion }}
+                {% if form.tipo_promocion.errors %}
+                  <div class="text-danger">{{ form.tipo_promocion.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Precio Oferta -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.Precio_oferta.label }} *</label>
+                {{ form.Precio_oferta }}
+                {% if form.Precio_oferta.errors %}
+                  <div class="text-danger">{{ form.Precio_oferta.errors }}</div>
+                {% endif %}
+                {% if promocion %}
+                  <small class="text-muted">
+                    Precio normal: ${{ promocion.Id_producto.Precio_kilo }}
+                  </small>
+                {% endif %}
+              </div>
+
+              <!-- Descuento Porcentaje -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.descuento_porcentaje.label }}</label>
+                {{ form.descuento_porcentaje }}
+                {% if form.descuento_porcentaje.errors %}
+                  <div class="text-danger">{{ form.descuento_porcentaje.errors }}</div>
+                {% endif %}
+                <small class="text-muted">Opcional, para promociones de descuento %</small>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Estado -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.estado.label }} *</label>
+                {{ form.estado }}
+                {% if form.estado.errors %}
+                  <div class="text-danger">{{ form.estado.errors }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Cantidad Mínima -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.cantidad_minima.label }}</label>
+                {{ form.cantidad_minima }}
+                {% if form.cantidad_minima.errors %}
+                  <div class="text-danger">{{ form.cantidad_minima.errors }}</div>
+                {% endif %}
+                <small class="text-muted">Para promociones mayoristas</small>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Fecha Inicio -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.Fecha_inicio.label }} *</label>
+                {{ form.Fecha_inicio }}
+                {% if form.Fecha_inicio.errors %}
+                  <div class="text-danger">{{ form.Fecha_inicio.errors }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Fecha Fin -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.Fecha_fin.label }} *</label>
+                {{ form.Fecha_fin }}
+                {% if form.Fecha_fin.errors %}
+                  <div class="text-danger">{{ form.Fecha_fin.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-3">
+              <label class="form-label">{{ form.descripcion.label }}</label>
+              {{ form.descripcion }}
+              {% if form.descripcion.errors %}
+                <div class="text-danger">{{ form.descripcion.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-center gap-3 mt-4">
+              <button type="submit" class="btn btn-primary">
+                💾 Guardar Promoción
+              </button>
+              <a href="{% url 'promocion_list' %}" class="btn btn-secondary">
+                ❌ Cancelar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Usuarios — BeefControl{% endblock %}
+
+{% block content %}
+<div class="content-card">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-users-cog me-2"></i>Gestión de Usuarios</h2>
+    <div>
+      <a href="{% url 'usuario_crear' %}" class="btn btn-primary">
+        <i class="fas fa-user-plus me-1"></i> Nuevo Usuario
+      </a>
+      <a href="{% url 'inicializar_grupos' %}" class="btn btn-secondary ms-2" 
+         onclick="return confirm('¿Inicializar grupos del sistema?')">
+        <i class="fas fa-cogs me-1"></i> Inicializar Grupos
+      </a>
+    </div>
+  </div>
+
+  <!-- Leyenda de roles -->
+  <div class="alert alert-info mb-4">
+    <h6 class="mb-2"><i class="fas fa-info-circle me-1"></i> Niveles de Acceso:</h6>
+    <div class="row">
+      <div class="col-md-3">
+        <span class="badge bg-danger me-1">admin</span> Acceso completo al sistema
+      </div>
+      <div class="col-md-3">
+        <span class="badge bg-success me-1">cajero</span> Ventas, clientes, promociones
+      </div>
+      <div class="col-md-3">
+        <span class="badge bg-warning text-dark me-1">despostador</span> Despostes, productos, insumos
+      </div>
+      <div class="col-md-3">
+        <span class="badge bg-info me-1">inventario</span> Productos, compras, proveedores
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de usuarios -->
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Usuario</th>
+          <th>Email</th>
+          <th>Rol / Grupo</th>
+          <th>Superusuario</th>
+          <th>Último acceso</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for usuario in usuarios %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center">
+              <div style="width:35px;height:35px;border-radius:50%;background:#dee2e6;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:10px;">
+                {{ usuario.username|slice:":1"|upper }}
+              </div>
+              <div>
+                <strong>{{ usuario.username }}</strong>
+                {% if usuario.first_name or usuario.last_name %}
+                <br><small class="text-muted">{{ usuario.first_name }} {{ usuario.last_name }}</small>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td>{{ usuario.email|default:"-" }}</td>
+          <td>
+            {% for grupo in usuario.groups.all %}
+              {% if grupo.name == 'admin' %}
+                <span class="badge bg-danger">{{ grupo.name }}</span>
+              {% elif grupo.name == 'cajero' %}
+                <span class="badge bg-success">{{ grupo.name }}</span>
+              {% elif grupo.name == 'despostador' %}
+                <span class="badge bg-warning text-dark">{{ grupo.name }}</span>
+              {% elif grupo.name == 'inventario' %}
+                <span class="badge bg-info">{{ grupo.name }}</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ grupo.name }}</span>
+              {% endif %}
+            {% empty %}
+              <span class="text-muted">Sin rol asignado</span>
+            {% endfor %}
+          </td>
+          <td>
+            {% if usuario.is_superuser %}
+              <span class="badge bg-purple" style="background:#6f42c1;">Sí</span>
+            {% else %}
+              <span class="text-muted">No</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if usuario.last_login %}
+              {{ usuario.last_login|date:"d/m/Y H:i:s" }}
+            {% else %}
+              <span class="text-muted">Nunca</span>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            <a href="{% url 'usuario_asignar_grupo' usuario.id %}" 
+               class="btn btn-sm btn-outline-primary" title="Asignar rol">
+              <i class="fas fa-user-tag"></i>
+            </a>
+            {% if usuario != request.user %}
+            <a href="{% url 'usuario_eliminar' usuario.id %}" 
+               class="btn btn-sm btn-outline-danger ms-1" title="Eliminar">
+              <i class="fas fa-trash"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            No hay usuarios registrados.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-3">
+    <a href="{% url 'index' %}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Volver al inicio
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+
+<h1>{{ producto.Corte }}</h1>
+
+
+<table class="tabla-producto">
+  <tr>
+    <th>Unidad de Medida</th>
+    <td><span class="badge bg-info">{{ producto.get_unidad_medida_display }}</span></td>
+  </tr>
+  <tr>
+    <th>Precio por {{ producto.get_unidad_medida_display }}</th>
+    <td>${{ producto.Precio_kilo }}</td>
+  </tr>
+  <tr>
+    <th>Precio mayorista por {{ producto.get_unidad_medida_display }}</th>
+    <td>{% if producto.precio_mayor_x_kg != None %}${{ producto.precio_mayor_x_kg }}{% else %}<span class="text-muted">No definido (sin descuento mayorista)</span>{% endif %}</td>
+  </tr>
+  <tr>
+    <th>En promoción</th>
+    <td>{{ producto.en_promocion|yesno:"Sí,No" }}</td>
+  </tr>
+  <tr>
+    <th>Stock disponible</th>
+    <td>{{ producto.stock_display }} {{ producto.get_unidad_medida_display }}</td>
+  </tr>
+  <tr>
+    <th>Fecha de ingreso/elaboración</th>
+    <td>{{ producto.fecha_ingreso_elaboracion }}</td>
+  </tr>
+  <tr>
+    <th>Fecha de vencimiento</th>
+    <td>{{ producto.fecha_vencimiento }}</td>
+  </tr>
+  <tr>
+    <th>Detalle</th>
+    <td>{{ producto.detalle }}</td>
+  </tr>
+</table>
+
+<button type="button" class="btn-volver" onclick="window.location.href='{% url 'lista_productos' %}'">volver al listado</button>
+{% endblock %}

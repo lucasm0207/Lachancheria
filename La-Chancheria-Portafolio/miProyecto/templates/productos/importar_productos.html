@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="fas fa-box"></i> Importar Productos desde CSV
+          </h4>
+        </div>
+        <div class="card-body">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-success" role="alert">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label fw-bold" for="{{ form.archivo_csv.id_for_label }}">
+                Seleccioná el archivo CSV:
+              </label>
+              {{ form.archivo_csv }}
+            </div>
+            <button type="submit" class="btn btn-success w-100 mt-3">
+              <i class="fas fa-upload"></i> Subir
+            </button>
+          </form>
+          <a href="{% url 'producto_list' %}" class="btn btn-secondary w-100 mt-3">
+            <i class="fas fa-arrow-left"></i> Volver a Productos
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

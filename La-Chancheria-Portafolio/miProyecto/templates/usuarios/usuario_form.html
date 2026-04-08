@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} — BeefControl{% endblock %}
+
+{% block content %}
+<div class="content-card" style="max-width: 600px; margin: auto;">
+  <h3 class="mb-4">
+    <i class="fas fa-user-plus me-2"></i>{{ titulo }}
+  </h3>
+
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+      <label for="username" class="form-label">Nombre de Usuario *</label>
+      <input type="text" name="username" id="username" class="form-control" 
+             required placeholder="ej: juan.perez" value="{{ request.POST.username|default:'' }}">
+    </div>
+
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" name="email" id="email" class="form-control" 
+             placeholder="ej: juan@example.com" value="{{ request.POST.email|default:'' }}">
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="password" class="form-label">Contraseña *</label>
+        <input type="password" name="password" id="password" class="form-control" 
+               required minlength="4" placeholder="Mínimo 4 caracteres">
+      </div>
+      <div class="col-md-6">
+        <label for="password2" class="form-label">Confirmar Contraseña *</label>
+        <input type="password" name="password2" id="password2" class="form-control" 
+               required minlength="4" placeholder="Repetir contraseña">
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label for="grupo" class="form-label">Rol / Grupo</label>
+      <select name="grupo" id="grupo" class="form-select">
+        <option value="">— Sin rol asignado —</option>
+        {% for grupo in grupos %}
+          <option value="{{ grupo.id }}">
+            {{ grupo.name }}
+            {% if grupo.name == 'admin' %}(Acceso completo){% endif %}
+            {% if grupo.name == 'cajero' %}(Ventas, clientes){% endif %}
+            {% if grupo.name == 'despostador' %}(Despostes, productos){% endif %}
+            {% if grupo.name == 'inventario' %}(Compras, proveedores){% endif %}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <a href="{% url 'gestion_usuarios' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Cancelar
+      </a>
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save me-1"></i> Crear Usuario
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

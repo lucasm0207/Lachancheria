@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">🚚 {{ titulo }}</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" id="proveedor-form" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+            
+            <div class="mb-3">
+              <label for="{{ form.Nombre.id_for_label }}" class="form-label fw-bold">
+                📝 Nombre del Proveedor <span class="text-danger">*</span>
+              </label>
+              {{ form.Nombre }}
+              {% if form.Nombre.errors %}
+                <div class="text-danger small mt-1">⚠️ {{ form.Nombre.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ form.Telefono.id_for_label }}" class="form-label fw-bold">
+                📞 Teléfono <span class="text-danger">*</span>
+              </label>
+              {{ form.Telefono }}
+              <small class="text-muted">Solo números (8-15 dígitos)</small>
+              {% if form.Telefono.errors %}
+                <div class="text-danger small mt-1">⚠️ {{ form.Telefono.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ form.Direccion.id_for_label }}" class="form-label fw-bold">
+                📍 Dirección
+              </label>
+              {{ form.Direccion }}
+              <small class="text-muted">Ingrese la dirección completa</small>
+              {% if form.Direccion.errors %}
+                <div class="text-danger small mt-1">⚠️ {{ form.Direccion.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="mb-4">
+              <label for="{{ form.Email.id_for_label }}" class="form-label fw-bold">
+                📧 Correo Electrónico
+              </label>
+              {{ form.Email }}
+              {% if form.Email.errors %}
+                <div class="text-danger small mt-1">⚠️ {{ form.Email.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-center gap-3">
+              <button type="submit" class="btn btn-success btn-lg">
+                💾 Guardar
+              </button>
+              <a href="{% url 'proveedor_list' %}" class="btn btn-secondary btn-lg">
+                ❌ Cancelar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alerta de error flotante -->
+<div id="error-toast" class="position-fixed top-0 end-0 p-3" style="z-index: 9999; display: none;">
+  <div class="toast show bg-danger text-white" role="alert">
+    <div class="toast-header bg-danger text-white">
+      <strong class="me-auto">⚠️ Error de validación</strong>
+      <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('error-toast').style.display='none'"></button>
+    </div>
+    <div class="toast-body" id="error-message">
+      Por favor complete todos los campos requeridos.
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const errorToast = document.getElementById('error-toast');
+  const errorMessage = document.getElementById('error-message');
+
+  // Función para mostrar error
+  function mostrarError(mensaje) {
+    errorMessage.textContent = mensaje;
+    errorToast.style.display = 'block';
+    setTimeout(() => {
+      errorToast.style.display = 'none';
+    }, 5000);
+  }
+
+  // Validación del teléfono: solo números
+  const telefonoInput = document.querySelector('input[name="Telefono"]');
+  if (telefonoInput) {
+    telefonoInput.addEventListener('input', function(e) {
+      // Permitir solo números, espacios y guiones
+      this.value = this.value.replace(/[^0-9\s\-]/g, '');
+    });
+  }
+  
+  // Validación del formulario antes de enviar
+  const form = document.getElementById('proveedor-form');
+  form.addEventListener('submit', function(e) {
+    let errores = [];
+    
+    const nombre = document.querySelector('input[name="Nombre"]');
+    if (!nombre.value.trim()) {
+      errores.push('Nombre');
+      nombre.classList.add('is-invalid');
+    } else {
+      nombre.classList.remove('is-invalid');
+    }
+    
+    const telefono = document.querySelector('input[name="Telefono"]');
+    if (!telefono.value.trim()) {
+      errores.push('Teléfono');
+      telefono.classList.add('is-invalid');
+    } else {
+      const telLimpio = telefono.value.replace(/[\s\-]/g, '');
+      if (!/^\d+$/.test(telLimpio)) {
+        errores.push('Teléfono (solo números)');
+        telefono.classList.add('is-invalid');
+      } else if (telLimpio.length < 8 || telLimpio.length > 15) {
+        errores.push('Teléfono (8-15 dígitos)');
+        telefono.classList.add('is-invalid');
+      } else {
+        telefono.classList.remove('is-invalid');
+      }
+    }
+    
+    const email = document.querySelector('input[name="Email"]');
+    if (email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+      errores.push('Email inválido');
+      email.classList.add('is-invalid');
+    } else {
+      email.classList.remove('is-invalid');
+    }
+    
+    if (errores.length > 0) {
+      e.preventDefault();
+      mostrarError('⚠️ Campos requeridos: ' + errores.join(', '));
+    }
+  });
+});
+</script>
+{% endblock %}

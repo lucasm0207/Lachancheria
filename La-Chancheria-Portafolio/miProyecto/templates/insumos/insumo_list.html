@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Insumos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>🛠️ Insumos</h2>
+    <div>
+      <a href="{% url 'insumo_create' %}" class="btn btn-primary">
+        ➕ Nuevo Insumo
+      </a>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Alerta de stock bajo -->
+  {% if insumos_stock_bajo %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>⚠️ Stock bajo (menos de 100 kg):</strong>
+      <ul class="mb-0 mt-1">
+        {% for ins in insumos_stock_bajo %}
+          <li><strong>{{ ins.nombre }}</strong> — {{ ins.Cantidad }} {{ ins.get_unidad_medida_display }}</li>
+        {% endfor %}
+      </ul>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endif %}
+
+  <!-- Panel de filtros -->
+  <div class="card mb-4">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">🔍 Buscar y Filtrar</h5>
+    </div>
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Nombre del Insumo</label>
+          <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre..." value="{{ request.GET.nombre }}">
+        </div>
+        
+        <div class="col-md-4">
+          <label class="form-label">Tipo</label>
+          <select name="tipo" class="form-select">
+            <option value="">Todos</option>
+            <option value="carne" {% if request.GET.tipo == 'carne' %}selected{% endif %}>🥩 Carne</option>
+            <option value="insumo" {% if request.GET.tipo == 'insumo' %}selected{% endif %}>📦 Insumo</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Stock</label>
+          <select name="stock" class="form-select">
+            <option value="">Todos</option>
+            <option value="bajo" {% if request.GET.stock == 'bajo' %}selected{% endif %}>⚠️ Stock bajo (&lt; 100 kg)</option>
+            <option value="sin" {% if request.GET.stock == 'sin' %}selected{% endif %}>❌ Sin stock</option>
+          </select>
+        </div>
+        
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">
+            🔍 Buscar
+          </button>
+          <a href="{% url 'insumo_list' %}" class="btn btn-secondary">
+            🔄 Limpiar Filtros
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de insumos -->
+  {% if insumos %}
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover table-striped">
+            <thead class="table-dark">
+              <tr>
+                <th>Insumo</th>
+                <th>Tipo</th>
+                <th>Unidad de Medida</th>
+                <th>Stock Disponible</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for insumo in insumos %}
+                <tr>
+                  <td>
+                    <strong>{{ insumo.nombre }}</strong>
+                    {% if insumo.categoria %}
+                      <br><small class="text-muted">{{ insumo.categoria }}</small>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if insumo.tipo == 'carne' %}
+                      <span class="badge bg-danger">🥩 Carne</span>
+                    {% else %}
+                      <span class="badge bg-secondary">📦 Insumo</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge bg-info">{{ insumo.get_unidad_medida_display }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ insumo.Cantidad }} {{ insumo.get_unidad_medida_display }}</strong>
+                  </td>
+                  <td>
+                    {% if insumo.Cantidad == 0 %}
+                      <span class="badge bg-danger">❌ Sin stock</span>
+                    {% elif insumo.stock_bajo %}
+                      <span class="badge bg-warning text-dark">⚠️ Stock bajo</span>
+                    {% else %}
+                      <span class="badge bg-success">✅ Disponible</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <a href="{% url 'insumo_detail' insumo.pk %}" 
+                         class="btn btn-info" title="Ver detalle">
+                        <i class="bi bi-eye" style="color: white;"></i>
+                      </a>
+                      <a href="{% url 'insumo_update' insumo.pk %}" 
+                         class="btn btn-success" title="Editar">
+                        <i class="bi bi-pencil" style="color: white;"></i>
+                      </a>
+                      <a href="{% url 'insumo_delete' insumo.pk %}" 
+                         class="btn btn-danger" title="Eliminar">
+                        <i class="bi bi-trash" style="color: white;"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="mt-3">
+          <p class="text-muted">
+            <strong>Total de insumos encontrados:</strong> {{ insumos.count }}
+          </p>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">
+      <h5>No se encontraron insumos</h5>
+      <p>Intenta cambiar los filtros o crea un nuevo insumo.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

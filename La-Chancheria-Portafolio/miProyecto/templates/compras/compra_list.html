@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Compras{% endblock %}
+
+
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>🛒 Compras</h2>
+    <div>
+      <a href="{% url 'compra_carne_create' %}" class="btn btn-primary">
+        ➕ Nueva Compra de Carne
+      </a>
+      <a href="{% url 'compra_insumo_create' %}" class="btn btn-primary ms-2">
+        ➕ Nueva Compra de Insumo
+      </a>
+    </div>
+  </div>
+
+  <!-- Panel de filtros -->
+  <div class="card mb-4">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">🔍 Buscar y Filtrar</h5>
+    </div>
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-2">
+          <label class="form-label">ID Compra</label>
+          <input type="text" name="id" class="form-control" placeholder="Buscar por ID..." value="{{ request.GET.id }}">
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label">Proveedor</label>
+          <input type="text" name="proveedor" class="form-control" placeholder="Buscar por proveedor..." value="{{ request.GET.proveedor }}">
+        </div>
+        
+        <div class="col-md-2">
+          <label class="form-label">Tipo de Compra</label>
+          <select name="tipo_compra" class="form-control">
+            <option value="">Todas</option>
+            <option value="carne" {% if request.GET.tipo_compra == 'carne' %}selected{% endif %}>Carne</option>
+            <option value="insumo" {% if request.GET.tipo_compra == 'insumo' %}selected{% endif %}>Insumo</option>
+          </select>
+        </div>
+        
+        <div class="col-md-2">
+          <label class="form-label">Rango de Precio</label>
+          <select name="rango_precio" class="form-control">
+            <option value="">Todos</option>
+            <option value="0-100" {% if request.GET.rango_precio == '0-100' %}selected{% endif %}>$0 - $100</option>
+            <option value="100-500" {% if request.GET.rango_precio == '100-500' %}selected{% endif %}>$100 - $500</option>
+            <option value="500-1000" {% if request.GET.rango_precio == '500-1000' %}selected{% endif %}>$500 - $1000</option>
+            <option value="1000" {% if request.GET.rango_precio == '1000' %}selected{% endif %}>Mayor a $1000</option>
+          </select>
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label">Fecha</label>
+          <input type="date" name="fecha" class="form-control" value="{{ request.GET.fecha }}">
+        </div>
+        
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">
+            🔍 Buscar
+          </button>
+          <a href="{% url 'compra_list' %}" class="btn btn-secondary">
+            🔄 Limpiar Filtros
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de compras -->
+  {% if compras %}
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover table-striped">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Proveedor</th>
+                <th>Tipo</th>
+                <th class="text-end">Total</th>
+                <th class="text-end">Pagado</th>
+                <th class="text-end">Saldo</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for compra in compras %}
+              <tr>
+                <td>
+                  <strong>#{{ compra.Id_compra }}</strong>
+                </td>
+                <td>
+                  <span class="badge bg-info">{{ compra.Id_proveedor }}</span>
+                </td>
+                <td>
+                  {% if compra.Tipo_compra == 'CARNE' %}
+                    <span class="badge bg-danger">🥩 Carne</span>
+                  {% elif compra.Tipo_compra == 'INSUMO' %}
+                    <span class="badge bg-secondary">📦 Insumo</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ compra.Tipo_compra }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-end fw-bold text-success">${{ compra.Precio_total|floatformat:2 }}</td>
+                <td class="text-end">${{ compra.monto_pagado|floatformat:2 }}</td>
+                <td class="text-end">
+                  {% if compra.saldo_pendiente > 0 %}
+                    <span class="text-danger fw-bold">${{ compra.saldo_pendiente|floatformat:2 }}</span>
+                  {% else %}
+                    <span class="text-success">$0.00</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if compra.esta_pagada %}
+                    <span class="badge bg-success">✅ Pagada</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">⏳ Pendiente</span>
+                  {% endif %}
+                </td>
+                <td>{{ compra.Fecha_compra|date:"d/m/Y H:i" }}</td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="{% url 'compra_update' compra.pk %}" 
+                       class="btn btn-success" title="Editar">
+                      <i class="bi bi-pencil" style="color: white;"></i>
+                    </a>
+                    <a href="{% url 'compra_delete' compra.pk %}" 
+                       class="btn btn-danger" title="Eliminar">
+                      <i class="bi bi-trash" style="color: white;"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="mt-3">
+          <p class="text-muted">
+            <strong>Total de compras encontradas:</strong> {{ compras.count }}
+          </p>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">
+      <h5>No se encontraron compras</h5>
+      <p>Intenta cambiar los filtros o registra una nueva compra.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

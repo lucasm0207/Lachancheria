@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo|default:'Registrar Producción' }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🏭 {{ titulo|default:'Registrar Producción' }}</h2>
+        <a href="{% url 'produccion_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la lista
+        </a>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Detalles de la Producción</h5>
+                </div>
+                
+                <div class="card-body p-4 bg-light">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="{{ form.receta.id_for_label }}" class="form-label fw-bold text-dark">
+                                📋 {{ form.receta.label }}
+                            </label>
+                            {{ form.receta }}
+                            {% if form.receta.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.receta.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.receta.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="{{ form.cantidad_producida.id_for_label }}" class="form-label fw-bold text-dark">
+                                📦 {{ form.cantidad_producida.label }}
+                            </label>
+                            {{ form.cantidad_producida }}
+                            {% if form.cantidad_producida.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.cantidad_producida.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.cantidad_producida.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="{{ form.merma.id_for_label }}" class="form-label fw-bold text-dark">
+                                📉 {{ form.merma.label }}
+                            </label>
+                            {{ form.merma }}
+                            {% if form.merma.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.merma.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.merma.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3 bg-white p-3 rounded border">
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label fw-bold text-dark">
+                                📝 {{ form.observaciones.label }}
+                            </label>
+                            {{ form.observaciones }}
+                            {% if form.observaciones.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <small><i class="bi bi-info-circle me-1"></i>{{ form.observaciones.help_text }}</small>
+                                </div>
+                            {% endif %}
+                            {% for error in form.observaciones.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'produccion_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="reset" class="btn btn-outline-warning">Limpiar</button>
+                            <button type="submit" class="btn btn-success fw-bold">
+                                <i class="bi bi-check-circle me-2"></i> Guardar Producción
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

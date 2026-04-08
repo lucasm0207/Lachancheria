@@ -1,0 +1,68 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Iniciar sesión — BeefControl</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+      /* Full black background + layout that centers content vertically */
+      body { background: #000; font-family: Inter, system-ui, sans-serif; min-height:100vh; display:flex; flex-direction:column; }
+      /* header styles moved to global CSS (site-header) */
+
+      .login-panel { max-width:980px; margin:auto; display:flex; align-items:center; justify-content:center; padding:30px 18px; }
+      .auth-image { border-radius: 12px; overflow: hidden; height: 420px; }
+      .auth-image img { width: 100%; height: 100%; object-fit: cover; }
+    </style>
+  </head>
+  <body>
+
+    <main class="container login-panel">
+      <div class="row gx-0 align-items-stretch shadow-lg rounded" style="width:100%;max-width:980px;">
+        <div class="col-md-6 bg-white d-flex flex-column justify-content-center align-items-center p-5">
+          <div class="w-75">
+            <h2 class="mb-4">Inicia sesión</h2>
+
+            {% if form.errors %}
+              <div class="alert alert-danger">Usuario o contraseña inválidos.</div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}">
+              {% csrf_token %}
+              {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+              {% endif %}
+              <div class="mb-3">
+                <label class="form-label" for="{{ form.username.id_for_label }}">Usuario</label>
+                <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" value="{{ form.username.value|default:'' }}" class="form-control" required autofocus>
+                {% if form.username.errors %}
+                  <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="{{ form.password.id_for_label }}">Contraseña</label>
+                <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" class="form-control" required>
+                {% if form.password.errors %}
+                  <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              <div class="d-grid gap-2 mb-3">
+                <button type="submit" class="btn btn-success">Iniciar sesión</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="col-md-6 p-0 auth-image d-none d-md-block">
+          <img src="{% static 'img/Background.webp' %}" alt="Fondo BeefControl">
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

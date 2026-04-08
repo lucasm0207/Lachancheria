@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>👥 Clientes</h2>
+    <div>
+      <a href="{% url 'cliente_create' %}" class="btn btn-primary">
+        ➕ Nuevo Cliente
+      </a>
+      <a href="{% url 'importar_clientes' %}" class="btn btn-primary ms-2">
+        📥 Importar Clientes
+      </a>
+    </div>
+  </div>
+
+  <!-- Panel de filtros -->
+  <div class="card mb-4">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">🔍 Buscar y Filtrar</h5>
+    </div>
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Nombre</label>
+          <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre..." value="{{ request.GET.nombre }}">
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label">Teléfono</label>
+          <input type="tel" name="telefono" class="form-control" placeholder="Buscar por teléfono..." value="{{ request.GET.telefono }}">
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" placeholder="Buscar por email..." value="{{ request.GET.email }}">
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label">Ciudad/Dirección</label>
+          <input type="text" name="ciudad" class="form-control" placeholder="Buscar por ciudad..." value="{{ request.GET.ciudad }}">
+        </div>
+        
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">
+            🔍 Buscar
+          </button>
+          <a href="{% url 'cliente_list' %}" class="btn btn-secondary">
+            🔄 Limpiar Filtros
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de clientes -->
+  {% if clientes %}
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover table-striped">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Dirección</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cliente in clientes %}
+              <tr>
+                <td>
+                  <strong>#{{ cliente.Id_cliente }}</strong>
+                </td>
+                <td>
+                  <strong>{{ cliente.Nombre }}</strong>
+                </td>
+                <td>{{ cliente.Telefono }}</td>
+                <td>{{ cliente.Email }}</td>
+                <td>{{ cliente.Direccion }}</td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="{% url 'historial_cliente_detalle' cliente.Id_cliente %}" 
+                       class="btn btn-warning" title="Ver historial">
+                      <i class="bi bi-eye" style="color: white;"></i>
+                    </a>
+                    <a href="{% url 'cliente_update' cliente.pk %}" 
+                       class="btn btn-success" title="Editar">
+                      <i class="bi bi-pencil" style="color: white;"></i>
+                    </a>
+                    <a href="{% url 'cliente_delete' cliente.pk %}" 
+                       class="btn btn-danger" title="Eliminar">
+                      <i class="bi bi-trash" style="color: white;"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="mt-3">
+          <p class="text-muted">
+            <strong>Total de clientes encontrados:</strong> {{ clientes.count }}
+          </p>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">
+      <h5>No se encontraron clientes</h5>
+      <p>Intenta cambiar los filtros o <a href="{% url 'cliente_create' %}">crea tu primer cliente</a>.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

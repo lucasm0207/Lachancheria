@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Historial de Compras de {{ cliente.Nombre }}</h2>
+
+{% if historial %}
+<div class="historial-container">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Tipo de Venta</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in historial %}
+            <tr>
+                <td>{{ detalle.Id_venta.Fecha_venta }}</td>
+                <td>{{ detalle.Id_venta.Tipo_venta }}</td>
+                <td>{{ detalle.Id_producto.Corte }}</td>
+                <td>{{ detalle.Cantidad }}</td>
+                <td>{{ detalle.Precio_total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>Este cliente no tiene compras registradas.</p>
+{% endif %}
+
+<h2>Ranking de Productos Más Comprados</h2>
+{% if ranking %}
+<ul class="ranking-list">
+    {% for item in ranking %}
+    <li>
+        {{ item.Id_producto__Corte }} - {{ item.total_cantidad }} Kg
+        <div class="bar" style="width: {{ item.total_cantidad|floatformat:0 }}px;"></div>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No hay productos comprados aún.</p>
+{% endif %}
+
+<a href="{% url 'cliente_list' %}" class="btn btn-secondary mt-3">Volver al listado de clientes</a>
+
+{% endblock %}

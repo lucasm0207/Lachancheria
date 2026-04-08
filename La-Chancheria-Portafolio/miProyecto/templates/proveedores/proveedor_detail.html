@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Proveedor: {{ proveedor.Nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🚚 {{ proveedor.Nombre }}</h2>
+        <div>
+            <a href="{% url 'proveedor_update' proveedor.Id_proveedor %}" class="btn btn-success">✏️ Editar</a>
+            <a href="{% url 'proveedor_list' %}" class="btn btn-secondary">← Volver</a>
+        </div>
+    </div>
+
+    <!-- Info del proveedor + Resumen financiero -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-light"><h5 class="mb-0">📇 Información</h5></div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <th>Teléfono:</th>
+                            <td>{{ proveedor.Telefono|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ proveedor.Email|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Dirección:</th>
+                            <td>{{ proveedor.Direccion|default:"—" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card text-center border-primary h-100">
+                        <div class="card-body">
+                            <h6 class="text-muted">Total Comprado</h6>
+                            <h3 class="text-primary">${{ total_comprado|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center border-success h-100">
+                        <div class="card-body">
+                            <h6 class="text-muted">Total Pagado</h6>
+                            <h3 class="text-success">${{ total_pagado|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center {% if deuda_total > 0 %}border-danger{% else %}border-success{% endif %} h-100">
+                        <div class="card-body">
+                            <h6 class="text-muted">Deuda Total</h6>
+                            <h3 class="{% if deuda_total > 0 %}text-danger{% else %}text-success{% endif %}">
+                                ${{ deuda_total|floatformat:2 }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de compras -->
+    <div class="card">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">📋 Historial de Compras</h5>
+            <div>
+                <a href="{% url 'compra_carne_create' %}" class="btn btn-sm btn-danger">🥩 Compra Carne</a>
+                <a href="{% url 'compra_insumo_create' %}" class="btn btn-sm btn-secondary">📦 Compra Insumo</a>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if compras %}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Pagado</th>
+                            <th class="text-end">Saldo</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for compra in compras %}
+                        <tr>
+                            <td><strong>#{{ compra.Id_compra }}</strong></td>
+                            <td>{{ compra.Fecha_compra|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if compra.Tipo_compra == 'CARNE' %}
+                                    <span class="badge bg-danger">🥩 Carne</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">📦 Insumo</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold">${{ compra.Precio_total|floatformat:2 }}</td>
+                            <td class="text-end">${{ compra.monto_pagado|floatformat:2 }}</td>
+                            <td class="text-end">
+                                {% if compra.saldo_pendiente > 0 %}
+                                    <span class="text-danger">${{ compra.saldo_pendiente|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="text-success">$0.00</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if compra.esta_pagada %}
+                                    <span class="badge bg-success">✅ Pagada</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">⏳ Pendiente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center mb-0">
+                No se han registrado compras con este proveedor.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

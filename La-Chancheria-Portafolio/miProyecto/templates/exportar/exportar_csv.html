@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>📤 Exportar datos a CSV</h2>
+<a href="{% url 'index' %}" class="btn btn-secondary mt-3">
+<i class="fas fa-arrow-left"></i> Volver
+</a>
+
+<div class="row mt-4">
+
+<div class="col-md-4">
+<div class="card shadow-sm">
+<div class="card-body text-center">
+
+<h5>Productos</h5>
+<p>Exportar listado de productos</p>
+
+<a href="{% url 'exportar_productos_csv' %}" 
+   class="btn btn-success"
+   target="_blank">
+   Descargar CSV
+</a>
+
+
+
+</div>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="card shadow-sm">
+<div class="card-body text-center">
+
+<h5>Clientes</h5>
+<p>Exportar listado de clientes</p>
+
+<a href="{% url 'exportar_clientes_csv' %}" class="btn btn-success">
+Descargar CSV
+</a>
+
+</div>
+</div>
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

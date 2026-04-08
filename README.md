@@ -35,25 +35,25 @@ Permite administrar productos, stock, ventas y compras, incorporando además pro
 ## 📸 Capturas del sistema
 
 ### 🔐 Login
-![Login](screenshots/login.png)
+![Login](screenshots/Login.png)
 
 ### 📊 Dashboard
 ![Dashboard](screenshots/Dashboard.png)
 
 ### 📦 Gestión de productos
-![Productos](screenshots/productos.png)
+![Productos](screenshots/Productos.png)
 
 ### 💰 Ventas
 ![Ventas](screenshots/ventas.png)
 
 ### 🧾 Formulario de ventas
-![Formulario Ventas](screenshots/formularios de ventas.png)
+![Formulario Ventas](screenshots/Ventasform.png)
 
 ### 🛒 Compras
 ![Compras](screenshots/compras.png)
 
 ### 🧾 Formulario de compras
-![Formulario Compras](screenshots/formularios de compra.png)
+![Formulario Compras](screenshots/Compraform.png)
 
 ---
 
